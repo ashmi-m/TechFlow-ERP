@@ -10,6 +10,9 @@ import {
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import EmployeeManagement from "./pages/EmployeeManagement";
+import AddEmployee from "./pages/AddEmployee";
+import ViewEmployee from "./pages/ViewEmployee";
 
 function App() {
   return (
@@ -18,13 +21,15 @@ function App() {
         {/* Login page */}
         <Route path="/" element={<Login />} />
 
-        {/* Protected pages */}
-        <Route element={<ProtectedRoute />}>
-          <Route
-            path="/dashboard"
-            element={<AdminDashboard />}
-          />
-        </Route>
+     <Route element={<ProtectedRoute />}>
+  <Route path="/dashboard" element={<AdminDashboard />} />
+
+  <Route path="/employees/add" element={<AddEmployee />} />
+
+  <Route path="/employees" element={<EmployeeManagement />} />
+
+  <Route path="/employees/:id" element={<ViewEmployee />} />
+</Route>
 
         {/* Unknown paths return to Login */}
         <Route path="*" element={<Navigate to="/" replace />} />

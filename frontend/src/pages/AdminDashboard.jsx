@@ -1,4 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom"
+
 import "./AdminDashboard.css";
 
 const initialProjects = [
@@ -131,12 +133,53 @@ function StatusPill({ status }) {
 }
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState("Dashboard");
   const [search, setSearch] = useState("");
   const [projectPage, setProjectPage] = useState(1);
   const [pageSize, setPageSize] = useState(4);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notice, setNotice] = useState("");
+
+
+    const [employees, setEmployees] = useState([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(true);
+  const [employeeError, setEmployeeError] = useState("");
+
+   useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/employees");
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to fetch employees");
+        }
+
+        setEmployees(data.employees);
+      } catch (error) {
+        setEmployeeError(error.message);
+      } finally {
+        setLoadingEmployees(false);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
+
+  const totalEmployees = employees.length;
+
+const activeEmployees = employees.filter(
+  (employee) => employee.status === "Active"
+).length;
+
+const onLeaveEmployees = employees.filter(
+  (employee) => employee.status === "On Leave"
+).length;
+
+const inactiveEmployees = employees.filter(
+  (employee) => employee.status === "Inactive"
+).length;
 
   const user = useMemo(() => {
     try {
@@ -179,18 +222,20 @@ export default function AdminDashboard() {
     safePage * pageSize
   );
 
-  function goToSection(label) {
-    setActiveMenu(label);
 
-    if (label !== "Dashboard") {
-      setNotice(
-        `${label} page is ready to connect.`
-      );
-    } else {
-      setNotice("");
-    }
+function goToSection(label) {
+  setActiveMenu(label);
+  setNotice("");
+
+  if (label === "Employees") {
+    navigate("/employees");
+    return;
   }
 
+  if (label !== "Dashboard") {
+    setNotice(`${label} page is ready to connect.`);
+  }
+}
   function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -413,7 +458,9 @@ export default function AdminDashboard() {
               <div className="stat-icon blue-bg">♟</div>
               <span className="stat-arrow blue-text">→</span>
               <p>Total Employees</p>
-              <strong className="stat-number">48</strong>
+<strong className="stat-number">
+  {loadingEmployees ? "..." : totalEmployees}
+</strong>
               <small className="stat-change positive">
                 ↗ 12% <span>vs last month</span>
               </small>
@@ -800,7 +847,9 @@ export default function AdminDashboard() {
 
                 <div className="employee-donut">
                   <div>
-                    <strong>48</strong>
+                    <strong>
+  {loadingEmployees ? "..." : totalEmployees}
+</strong>
                     <span>Total Employees</span>
                   </div>
                 </div>
