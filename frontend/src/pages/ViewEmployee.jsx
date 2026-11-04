@@ -225,9 +225,9 @@ export default function ViewEmployee() {
                         <button type="button" className="view-employee-btn" onClick={() => navigate("/employees")}>
                             <Icon name="back" size={14} /> Back to Employees
                         </button>
-                        <button type="button" className="view-employee-btn view-employee-btn-primary" onClick={() => navigate(`/employees/${id}/edit`)}>
+                        {/* <button type="button" className="view-employee-btn view-employee-btn-primary" onClick={() => navigate(`/employees/${id}/edit`)}>
                             <Icon name="edit" size={14} /> Edit Employee
-                        </button>
+                        </button> */}
                     </div>
                 </header>
 

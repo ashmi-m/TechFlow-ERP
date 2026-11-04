@@ -60,8 +60,18 @@ function Login() {
       otherStorage.removeItem("token");
       otherStorage.removeItem("user");
 
-      // Redirect to the existing Admin Dashboard
-      navigate("/dashboard", { replace: true });
+// Redirect users based on their role
+const role = data.user.role;
+
+if (role === "Admin") {
+  navigate("/dashboard", { replace: true });
+} else if (role === "Project Manager") {
+  navigate("/project-manager/dashboard", { replace: true });
+} else if (role === "Employee") {
+  navigate("/employee/dashboard", { replace: true });
+} else {
+  setError("Invalid user role. Please contact the administrator.");
+}
     } catch (err) {
       console.error("Login error:", err);
 

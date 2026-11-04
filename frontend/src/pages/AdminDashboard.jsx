@@ -223,6 +223,20 @@ const inactiveEmployees = employees.filter(
   );
 
 
+// function goToSection(label) {
+//   setActiveMenu(label);
+//   setNotice("");
+
+//   if (label === "Employees") {
+//     navigate("/employees");
+//     return;
+//   }
+
+//   if (label !== "Dashboard") {
+//     setNotice(`${label} page is ready to connect.`);
+//   }
+// }
+
 function goToSection(label) {
   setActiveMenu(label);
   setNotice("");
@@ -232,10 +246,16 @@ function goToSection(label) {
     return;
   }
 
+  if (label === "Departments") {
+    navigate("/departments");
+    return;
+  }
+
   if (label !== "Dashboard") {
     setNotice(`${label} page is ready to connect.`);
   }
 }
+
   function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");

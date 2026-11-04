@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import "./EmployeeManagement.css";
 
 const API_URL = "http://localhost:5000/api/employees";
@@ -234,13 +235,113 @@ const handleEditEmployee = (employee) => {
   });
 };
 
-  const handleDeleteEmployee = (employee) => {
-    alert(
-      `Delete functionality for ${
-        employee.name || "this employee"
-      } will be implemented after adding the backend delete API.`
+const handleEditChange = (event) => {
+  const { name, value } = event.target;
+
+  setEditForm((previous) => ({
+    ...previous,
+    [name]: value,
+  }));
+};
+
+const closeEditModal = () => {
+  setEditingEmployee(null);
+};
+
+const handleUpdateEmployee = async (event) => {
+  event.preventDefault();
+
+  try {
+    const response = await fetch(
+      `${API_URL}/${editingEmployee._id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editForm),
+      }
     );
-  };
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to update employee.");
+    }
+
+    setEmployees((previous) =>
+      previous.map((employee) =>
+        employee._id === editingEmployee._id
+          ? { ...employee, ...editForm }
+          : employee
+      )
+    );
+
+   closeEditModal();
+
+Swal.fire({
+  icon: "success",
+  title: "Updated Successfully!",
+  text: "Employee details have been updated.",
+  confirmButtonText: "Done",
+  confirmButtonColor: "#2864ef",
+});
+  } catch (error) {
+    alert(error.message || "Unable to update employee.");
+  }
+};
+
+ const handleDeleteEmployee = async (employee) => {
+  // Show confirmation popup
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: `Do you want to delete ${employee.name}?`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#dc2626",
+    cancelButtonColor: "#64748b",
+    confirmButtonText: "Yes, Delete",
+    cancelButtonText: "Cancel",
+  });
+
+  // Stop if the user clicks Cancel
+  if (!result.isConfirmed) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/${employee._id}`, {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to delete employee.");
+    }
+
+    // Remove deleted employee from the table
+    setEmployees((previous) =>
+      previous.filter((item) => item._id !== employee._id)
+    );
+
+    // Show success popup
+    Swal.fire({
+      icon: "success",
+      title: "Deleted Successfully!",
+      text: "Employee has been deleted.",
+      confirmButtonColor: "#2864ef",
+    });
+
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Delete Failed!",
+      text: error.message || "Unable to delete employee.",
+      confirmButtonColor: "#2864ef",
+    });
+  }
+};
 
   return (
     <div className="employee-app">
@@ -263,13 +364,13 @@ const handleEditEmployee = (employee) => {
             <span>♙</span> Employees
           </a>
 
-          <a
-            href="/dashboard"
-            className="sidebar-link"
-            onClick={(event) => event.preventDefault()}
-          >
-            <span>▤</span> Departments
-          </a>
+         <button
+  type="button"
+  className="sidebar-link"
+  onClick={() => navigate("/departments")}
+>
+  <span>▤</span> Departments
+</button>
 
           <a
             href="/dashboard"
@@ -737,6 +838,119 @@ const handleEditEmployee = (employee) => {
           <p className="page-footer">
             © 2026 TechFlow ERP. All rights reserved.
           </p>
+           {editingEmployee && (
+  <div className="edit-modal-overlay">
+    <div className="edit-modal">
+      <div className="edit-modal-header">
+        <div>
+          <h2>Edit Employee</h2>
+          <p>Update employee information</p>
+        </div>
+
+        <button type="button" onClick={closeEditModal}>
+          ×
+        </button>
+      </div>
+
+      <form onSubmit={handleUpdateEmployee}>
+        <div className="edit-form-grid">
+          <label>
+            Full Name
+            <input
+              type="text"
+              name="name"
+              value={editForm.name}
+              onChange={handleEditChange}
+              required
+            />
+          </label>
+
+          <label>
+            Email Address
+            <input
+              type="email"
+              name="email"
+              value={editForm.email}
+              onChange={handleEditChange}
+              required
+            />
+          </label>
+
+          <label>
+            Phone Number
+            <input
+              type="text"
+              name="phone"
+              value={editForm.phone}
+              onChange={handleEditChange}
+            />
+          </label>
+
+          <label>
+            Department
+            <input
+              type="text"
+              name="department"
+              value={editForm.department}
+              onChange={handleEditChange}
+              required
+            />
+          </label>
+
+          <label>
+            Designation
+            <input
+              type="text"
+              name="designation"
+              value={editForm.designation}
+              onChange={handleEditChange}
+              required
+            />
+          </label>
+
+          <label>
+            Role
+            <select
+              name="role"
+              value={editForm.role}
+              onChange={handleEditChange}
+            >
+              <option>Admin</option>
+              <option>Project Manager</option>
+              <option>Employee</option>
+            </select>
+          </label>
+
+          <label>
+            Status
+            <select
+              name="status"
+              value={editForm.status}
+              onChange={handleEditChange}
+            >
+              <option>Active</option>
+              <option>On Leave</option>
+              <option>Inactive</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="edit-modal-actions">
+          <button
+            type="button"
+            onClick={closeEditModal}
+          >
+            Cancel
+          </button>
+
+          <button type="submit">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
         </section>
       </main>
     </div>

@@ -9,6 +9,7 @@ const mongoose = require('mongoose');
 const cloudinary = require('./config/cloudinary');
 const authRoutes = require('./routes/authRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
+const departmentRoutes = require("./routes/departmentRoutes");
 
 const app = express();
 
@@ -40,6 +41,7 @@ mongoose.connection.readyState === 1
 
 app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
+app.use("/api/departments", departmentRoutes);
 
 const PORT = process.env.PORT || 5000;
 
