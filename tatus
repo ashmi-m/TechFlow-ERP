@@ -1,0 +1,252 @@
+[1mdiff --git a/frontend/src/App.jsx b/frontend/src/App.jsx[m
+[1mindex 83353fd..5122a90 100644[m
+[1m--- a/frontend/src/App.jsx[m
+[1m+++ b/frontend/src/App.jsx[m
+[36m@@ -76,7 +76,7 @@[m [mimport EmployeeManagement from "./pages/EmployeeManagement";[m
+ import AddEmployee from "./pages/AddEmployee";[m
+ import ViewEmployee from "./pages/ViewEmployee";[m
+ import DepartmentManagement from "./pages/DepartmentManagement";[m
+[31m-[m
+[32m+[m[32mimport Projectmanagerlogin from "./pages/Projectmanagerlogin";[m
+ function App() {[m
+   return ([m
+     <BrowserRouter>[m
+[36m@@ -85,7 +85,7 @@[m [mfunction App() {[m
+         <Route path="/" element={<Login />} />[m
+ [m
+         {/* Admin Routes */}[m
+[31m-        <Route element={<ProtectedRoute allowedRoles={["Admin"]} />}>[m
+[32m+[m[32m        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>[m
+           <Route path="/dashboard" element={<AdminDashboard />} />[m
+           <Route path="/employees" element={<EmployeeManagement />} />[m
+           <Route path="/employees/add" element={<AddEmployee />} />[m
+[36m@@ -94,7 +94,7 @@[m [mfunction App() {[m
+         </Route>[m
+ [m
+         {/* Project Manager Routes */}[m
+[31m-        <Route element={<ProtectedRoute allowedRoles={["Project Manager"]} />}>[m
+[32m+[m[32m        <Route element={<ProtectedRoute allowedRoles={["project_manager"]} />}>[m
+           <Route[m
+             path="/project-manager/dashboard"[m
+             element={<ProjectManagerDashboard />}[m
+[36m@@ -102,12 +102,16 @@[m [mfunction App() {[m
+         </Route>[m
+ [m
+         {/* Employee Routes */}[m
+[31m-        <Route element={<ProtectedRoute allowedRoles={["Employee"]} />}>[m
+[32m+[m[32m        <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>[m
+           <Route[m
+             path="/employee/dashboard"[m
+             element={<EmployeeDashboard />}[m
+           />[m
+         </Route>[m
+[32m+[m[32m        <Route[m
+[32m+[m[32m  path="/project-manager/login"[m
+[32m+[m[32m  element={<Projectmanagerlogin />}[m
+[32m+[m[32m/>[m
+ [m
+         {/* Unknown Routes */}[m
+         <Route path="*" element={<Navigate to="/" replace />} />[m
+[1mdiff --git a/frontend/src/pages/Login.css b/frontend/src/pages/Login.css[m
+[1mindex 6fb9b88..c5e74ac 100644[m
+[1m--- a/frontend/src/pages/Login.css[m
+[1m+++ b/frontend/src/pages/Login.css[m
+[36m@@ -1,7 +1,7 @@[m
+ [m
+[31m-/* ================================[m
+[31m-   GLOBAL STYLES[m
+[31m-================================ */[m
+[32m+[m[32m/* =========================================[m
+[32m+[m[32m   1. GLOBAL STYLES[m
+[32m+[m[32m========================================= */[m
+ [m
+ * {[m
+   box-sizing: border-box;[m
+[36m@@ -13,12 +13,25 @@[m
+   text-rendering: optimizeLegibility;[m
+   -webkit-font-smoothing: antialiased;[m
+ [m
+[31m-  --primary: #2864f0;[m
+[31m-  --primary-dark: #174bd1;[m
+[31m-  --text-main: #172033;[m
+[31m-  --text-muted: #718096;[m
+[31m-  --border: #e1e8f3;[m
+[31m-  --panel: #ffffff;[m
+[32m+[m[32m  --primary: #3478ff;[m
+[32m+[m[32m  --primary-dark: #1e5de0;[m
+[32m+[m[32m  --primary-light: #60a5ff;[m
+[32m+[m
+[32m+[m[32m  --bg-main: #06132b;[m
+[32m+[m[32m  --bg-panel: #0b1b38;[m
+[32m+[m[32m  --bg-input: #263d5e;[m
+[32m+[m
+[32m+[m[32m  --text-main: #f5f8ff;[m
+[32m+[m[32m  --text-muted: #a7b9d8;[m
+[32m+[m
+[32m+[m[32m  --border: #2b4266;[m
+[32m+[m
+[32m+[m[32m  --transition: 0.25s ease;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mhtml {[m
+[32m+[m[32m  min-width: 320px;[m
+[32m+[m[32m  min-height: 100%;[m
+ }[m
+ [m
+ body {[m
+[36m@@ -39,40 +52,51 @@[m [mbutton {[m
+ button:focus-visible,[m
+ a:focus-visible,[m
+ input:focus-visible {[m
+[31m-  outline: 3px solid #7da7ff;[m
+[32m+[m[32m  outline: 3px solid #78aaff;[m
+   outline-offset: 3px;[m
+ }[m
+ [m
+[31m-/* ================================[m
+[31m-   PAGE BACKGROUND[m
+[31m-================================ */[m
+[32m+[m[32m/* =========================================[m
+[32m+[m[32m   2. MAIN PAGE[m
+[32m+[m[32m========================================= */[m
+ [m
+ .login-page {[m
+   min-height: 100vh;[m
+   padding: 30px;[m
+[32m+[m
+   display: flex;[m
+   align-items: center;[m
+   justify-content: center;[m
+[32m+[m
+   overflow: hidden;[m
+ [m
+   background:[m
+     radial-gradient([m
+[31m-      circle at 10% 10%,[m
+[31m-      rgba(82, 139, 255, 0.12),[m
+[32m+[m[32m      circle at 12% 12%,[m
+[32m+[m[32m      rgba(36, 102, 225, 0.22),[m
+       transparent 32%[m
+     ),[m
+[31m-    linear-gradient(135deg, #eef3fc, #e8effb);[m
+[32m+[m[32m    radial-gradient([m
+[32m+[m[32m      circle at 90% 90%,[m
+[32m+[m[32m      rgba(30, 91, 210, 0.15),[m
+[32m+[m[32m      transparent 35%[m
+[32m+[m[32m    ),[m
+[32m+[m[32m    linear-gradient(135deg, #06132b, #081b3a);[m
+ [m
+   color: var(--text-main);[m
+[31m-  transition: background 0.3s ease, color 0.3s ease;[m
+[32m+[m
+[32m+[m[32m  transition:[m
+[32m+[m[32m    background var(--transition),[m
+[32m+[m[32m    color var(--transition);[m
+ }[m
+ [m
+[31m-/* ================================[m
+[31m-   MAIN LOGIN CONTAINER[m
+[31m-================================ */[m
+[32m+[m[32m/* =========================================[m
+[32m+[m[32m   3. MAIN CONTAINER[m
+[32m+[m[32m========================================= */[m
+ [m
+ .login-container {[m
+   position: relative;[m
+[32m+[m
+   display: grid;[m
+   grid-template-columns: 1.08fr 0.92fr;[m
+ [m
+[36m@@ -81,68 +105,85 @@[m [minput:focus-visible {[m
+   min-height: 740px;[m
+ [m
+   overflow: hidden;[m
+[31m-  background: var(--panel);[m
+[31m-  border: 1px solid rgba(255, 255, 255, 0.9);[m
+[31m-  border-radius: 20px;[m
+[32m+[m
+[32m+[m[32m  background: #0c1d39;[m
+[32m+[m
+[32m+[m[32m  border: 1px solid rgba(103, 153, 237, 0.2);[m
+[32m+[m[32m  border-radius: 22px;[m
+ [m
+   box-shadow:[m
+[31m-    0 30px 80px rgba(36, 64, 112, 0.12),[m
+[31m-    0 4px 15px rgba(36, 64, 112, 0.05);[m
+[32m+[m[32m    0 30px 90px rgba(0, 0, 0, 0.4),[m
+[32m+[m[32m    0 0 40px rgba(35, 103, 230, 0.08);[m
+ }[m
+ [m
+[31m-/* ================================[m
+[31m-   LEFT PANEL[m
+[31m-================================ */[m
+[32m+[m[32m/* =========================================[m
+[32m+[m[32m   4. LEFT PANEL[m
+[32m+[m[32m========================================= */[m
+ [m
+ .login-intro {[m
+   position: relative;[m
+   isolation: isolate;[m
+[32m+[m
+   min-width: 0;[m
+[32m+[m
+   padding: 42px 46px 35px;[m
+[32m+[m
+   overflow: hidden;[m
+ [m
+   background:[m
+     radial-gradient([m
+[31m-      circle at 80% 82%,[m
+[31m-      rgba(76, 136, 255, 0.13),[m
+[31m-      transparent 32%[m
+[32m+[m[32m      circle at 85% 80%,[m
+[32m+[m[32m      rgba(41, 109, 238, 0.19),[m
+[32m+[m[32m      transparent 35%[m
+     ),[m
+[31m-    linear-gradient(145deg, #fbfdff 0%, #f2f7ff 100%);[m
+[32m+[m[32m    linear-gradient([m
+[32m+[m[32m      145deg,[m
+[32m+[m[32m      #07152f 0%,[m
+[32m+[m[32m      #0b2045 55%,[m
+[32m+[m[32m      #102b59 100%[m
+[32m+[m[32m    );[m
+ }[m
+ [m
+[31m-/* Subtle decorative background */[m
+[31m-[m
+ .login-intro::before {[m
+   content: "";[m
+[32m+[m
+   position: absolute;[m
+   z-index: -1;[m
+[31m-  width: 360px;[m
+[31m-  height: 360px;[m
+[32m+[m
+[32m+[m[32m  width: 390px;[m
+[32m+[m[32m  height: 390px;[m
+[32m+[m
+   right: -190px;[m
+[31m-  top: 150px;[m
+[32m+[m[32m  top: 145px;[m
+[32m+[m
+[32m+[m[32m  border: 1px solid rgba(92, 149, 255, 0.17);[m
+   border-radius: 50%;[m
+[31m-  border: 1px solid rgba(40, 100, 240, 0.09);[m
+ }[m
+ [m
+ .login-intro::after {[m
+   content: "";[m
+[32m+[m
+   position: absolute;[m
+   z-index: -1;[m
+[31m-  width: 250px;[m
+[31m-  height: 250px;[m
+[32m+[m
+[32m+[m[32m  width: 280px;[m
+[32m+[m[32m  height: 280px;[m
+[32m+[m
+   right: -140px;[m
+   bottom: -130px;[m
+[32m+[m
+   border-radius: 50%;[m
+[31m-  background: rgba(83, 143, 255, 0.08);

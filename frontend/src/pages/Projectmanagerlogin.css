@@ -1,0 +1,1418 @@
+
+/* =========================================
+   1. GLOBAL RESET
+========================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #64a5ff;
+  outline-offset: 3px;
+}
+
+
+/* =========================================
+   2. MAIN PAGE
+========================================= */
+
+.pm-login-page {
+  --blue: #3984ff;
+  --primary: #2864ef;
+
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+
+  padding: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(22, 75, 165, 0.35),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 90% 90%,
+      rgba(20, 65, 145, 0.25),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      #020b20,
+      #071936,
+      #020b20
+    );
+
+  color: #fff;
+
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+
+/* =========================================
+   3. MAIN CONTAINER
+========================================= */
+
+.pm-login-container {
+  position: relative;
+
+  width: 100%;
+  max-width: 1400px;
+  min-height: 760px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(380px, 1fr);
+
+  align-items: stretch;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(74, 132, 255, 0.4);
+  border-radius: 25px;
+
+  background: #07152f;
+
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.45),
+    0 0 35px rgba(24, 91, 220, 0.08);
+}
+
+
+/* =========================================
+   4. LEFT HERO SECTION
+========================================= */
+
+.pm-hero-section {
+  position: relative;
+
+  min-width: 0;
+  min-height: 760px;
+
+  padding: 35px 38px 70px;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 85% 40%,
+      rgba(24, 95, 230, 0.28),
+      transparent 38%
+    ),
+    linear-gradient(
+      135deg,
+      #06132e,
+      #071b40 65%,
+      #09265b
+    );
+
+  border-right: 1px solid rgba(86, 139, 255, 0.2);
+}
+
+
+/* =========================================
+   5. BRAND LOGO
+========================================= */
+
+.pm-brand,
+.pm-form-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  flex-shrink: 0;
+}
+
+.pm-logo {
+  width: 48px;
+  height: 50px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #fff;
+
+  font-size: 40px;
+  font-weight: 900;
+  font-style: italic;
+
+  background: linear-gradient(
+    135deg,
+    #42a5ff,
+    #0755ff
+  );
+
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 22%,
+    65% 22%,
+    65% 100%,
+    35% 100%,
+    35% 22%,
+    0 22%
+  );
+}
+
+.pm-brand h2,
+.pm-form-brand h2 {
+  color: #fff;
+
+  font-size: 23px;
+  font-weight: 750;
+  letter-spacing: -0.7px;
+}
+
+.pm-brand h2 span,
+.pm-form-brand h2 span {
+  color: #3983ff;
+}
+
+
+/* =========================================
+   6. PORTAL BADGE
+========================================= */
+
+.pm-portal-badge {
+  width: fit-content;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  margin-top: 27px;
+  padding: 12px 18px;
+
+  border: 1px solid rgba(48, 116, 255, 0.3);
+  border-radius: 30px;
+
+  background: rgba(37, 102, 225, 0.15);
+
+  color: #74aaff;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+}
+
+
+/* =========================================
+   7. HERO CONTENT
+========================================= */
+
+.pm-hero-content {
+  flex: 1;
+
+  min-width: 0;
+  min-height: 0;
+
+  display: grid;
+
+  /* More space for the project image */
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 22px;
+}
+
+.pm-hero-text {
+  position: relative;
+  z-index: 2;
+
+  min-width: 0;
+}
+
+.pm-hero-text h1 {
+  margin-bottom: 18px;
+
+  color: #fff;
+
+  font-size: clamp(34px, 3.1vw, 47px);
+  font-weight: 850;
+  line-height: 1.13;
+  letter-spacing: -1.7px;
+}
+
+.pm-hero-text h1 span {
+  color: #3984ff;
+}
+
+.pm-hero-text > p {
+  max-width: 340px;
+
+  margin-bottom: 25px;
+
+  color: #a8bfeb;
+
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+
+/* =========================================
+   8. FEATURES
+========================================= */
+
+.pm-features {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.pm-feature {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  color: #dce9ff;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pm-feature-icon {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(74, 143, 255, 0.35);
+  border-radius: 12px;
+
+  background: linear-gradient(
+    145deg,
+    #174ba6,
+    #0b2c66
+  );
+
+  color: #fff;
+  font-size: 19px;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.pm-feature:hover .pm-feature-icon {
+  transform: translateY(-3px);
+
+  background: linear-gradient(
+    145deg,
+    #2369d8,
+    #10418e
+  );
+}
+
+
+/* =========================================
+   9. WORKSPACE IMAGE
+   Slightly bigger, not excessively zoomed
+========================================= */
+
+.pm-workspace {
+  position: relative;
+
+  width: 100%;
+  min-width: 0;
+
+  height: clamp(330px, 35vw, 440px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: visible;
+}
+
+.pm-workspace-image {
+  display: block;
+
+  width: 112%;
+  max-width: 570px;
+
+  height: 112%;
+  max-height: 490px;
+
+  object-fit: contain;
+  object-position: center;
+
+  border-radius: 14px;
+
+  filter: drop-shadow(
+    0 18px 30px rgba(0, 0, 0, 0.3)
+  );
+
+  transform: scale(1.03);
+
+  transition: transform 0.35s ease;
+}
+
+.pm-workspace-image:hover {
+  transform: scale(1.06);
+}
+
+
+/* =========================================
+   10. BOTTOM TAGLINE
+========================================= */
+
+.pm-tagline {
+  position: absolute;
+
+  bottom: 27px;
+  left: 38px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #b3caff;
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+}
+
+.pm-tagline span {
+  color: #3984ff;
+}
+
+.pm-tagline div {
+  width: 65px;
+  height: 2px;
+
+  margin-left: 5px;
+
+  background: linear-gradient(
+    90deg,
+    #2864ef,
+    transparent
+  );
+}
+
+
+/* =========================================
+   11. RIGHT LOGIN SECTION
+========================================= */
+
+.pm-form-section {
+  position: relative;
+
+  min-width: 0;
+
+  padding: 85px clamp(28px, 3vw, 44px) 30px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(37, 94, 185, 0.15),
+      transparent 35%
+    ),
+    linear-gradient(
+      145deg,
+      #132440,
+      #0a1730
+    );
+}
+
+
+/* =========================================
+   12. THEME TOGGLE
+========================================= */
+
+.pm-theme-toggle {
+  position: absolute;
+
+  top: 20px;
+  right: 22px;
+
+  z-index: 5;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 10px 15px;
+
+  border: 1px solid #354f78;
+  border-radius: 30px;
+
+  background: rgba(40, 100, 239, 0.12);
+
+  color: #dce9ff;
+
+  font-size: 12px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.pm-theme-toggle:hover {
+  border-color: #3984ff;
+  background: rgba(40, 100, 239, 0.25);
+
+  transform: translateY(-2px);
+}
+
+.pm-theme-toggle span {
+  font-size: 17px;
+}
+
+
+/* =========================================
+   13. LOGIN BRAND
+========================================= */
+
+.pm-form-brand {
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.pm-form-brand .pm-logo {
+  width: 42px;
+  height: 44px;
+
+  font-size: 35px;
+}
+
+.pm-form-brand h2 {
+  font-size: 21px;
+}
+
+
+/* =========================================
+   14. WELCOME SECTION
+========================================= */
+
+.pm-welcome {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.pm-welcome > span {
+  color: #679eff;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+.pm-welcome h1 {
+  margin: 17px 0 9px;
+
+  color: #fff;
+
+  font-size: clamp(24px, 2.1vw, 31px);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+}
+
+.pm-welcome p {
+  max-width: 370px;
+
+  margin: 0 auto;
+
+  color: #a8bfeb;
+
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+
+/* =========================================
+   15. LOGIN FORM
+========================================= */
+
+.pm-login-form {
+  width: 100%;
+}
+
+.pm-input-group {
+  margin-bottom: 21px;
+}
+
+.pm-input-group label {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: #f0f5ff;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pm-input-box {
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+
+  overflow: hidden;
+
+  border: 1px solid #354d73;
+  border-radius: 11px;
+
+  background: #192d4d;
+
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+
+.pm-input-box:hover {
+  border-color: #5274a7;
+}
+
+.pm-input-box:focus-within {
+  border-color: #3984ff;
+  background: #1c3254;
+
+  box-shadow: 0 0 0 3px rgba(40, 100, 239, 0.15);
+}
+
+.pm-input-box > span {
+  width: 54px;
+  height: 100%;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #b5c9eb;
+
+  font-size: 19px;
+
+  background: rgba(7, 20, 43, 0.2);
+}
+
+.pm-input-box input {
+  flex: 1;
+
+  min-width: 0;
+  height: 100%;
+
+  padding: 0 10px;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  color: #fff;
+
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.pm-input-box input::placeholder {
+  color: #a5b9db;
+}
+
+.pm-input-box input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
+/* =========================================
+   16. SHOW PASSWORD
+========================================= */
+
+.pm-show-password {
+  height: 100%;
+
+  flex-shrink: 0;
+
+  padding: 0 16px;
+
+  border: none;
+
+  background: #1d3558;
+
+  color: #3984ff;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: color 0.25s ease, background 0.25s ease;
+}
+
+.pm-show-password:hover {
+  color: #fff;
+  background: #24446e;
+}
+
+
+/* =========================================
+   17. REMEMBER ME / FORGOT PASSWORD
+========================================= */
+
+.pm-form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  flex-wrap: wrap;
+  gap: 12px;
+
+  margin: 5px 0 25px;
+}
+
+.pm-remember-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  color: #d0def4;
+
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pm-remember-label input {
+  width: 16px;
+  height: 16px;
+
+  accent-color: #2864ef;
+  cursor: pointer;
+}
+
+.pm-forgot {
+  padding: 0;
+
+  border: none;
+  background: transparent;
+
+  color: #4389ff;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.pm-forgot:hover {
+  color: #80b2ff;
+}
+
+
+/* =========================================
+   18. ERROR MESSAGE
+========================================= */
+
+.pm-error-message {
+  padding: 12px 14px;
+  margin-bottom: 17px;
+
+  border: 1px solid rgba(255, 60, 60, 0.3);
+  border-radius: 9px;
+
+  background: rgba(255, 60, 60, 0.1);
+
+  color: #ff8585;
+
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+
+/* =========================================
+   19. SIGN IN BUTTON
+========================================= */
+
+.pm-signin-button {
+  width: 100%;
+  min-height: 57px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(
+    100deg,
+    #287aff,
+    #2155ed
+  );
+
+  color: #fff;
+
+  font-size: 15px;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  box-shadow: 0 10px 25px rgba(24, 93, 240, 0.25);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
+}
+
+.pm-signin-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+
+  box-shadow: 0 14px 30px rgba(24, 93, 240, 0.4);
+}
+
+.pm-signin-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pm-signin-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.pm-spinner {
+  width: 17px;
+  height: 17px;
+
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+
+  border-radius: 50%;
+
+  animation: pm-spin 0.7s linear infinite;
+}
+
+@keyframes pm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================
+   20. DIVIDER
+========================================= */
+
+.pm-or {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  margin: 23px 0 19px;
+
+  color: #9cb1d4;
+  font-size: 12px;
+}
+
+.pm-or span {
+  flex: 1;
+  height: 1px;
+  background: #304566;
+}
+
+
+/* =========================================
+   21. SECURE ACCESS
+========================================= */
+
+.pm-secure {
+  align-self: center;
+
+  padding: 11px 24px;
+
+  border: 1px solid #354f78;
+  border-radius: 30px;
+
+  color: #d9e7ff;
+
+  font-size: 12px;
+  font-weight: 650;
+
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.pm-secure:hover {
+  border-color: #3984ff;
+  background: rgba(40, 100, 239, 0.08);
+}
+
+.pm-secure span {
+  margin-right: 7px;
+  color: #3984ff;
+}
+
+
+/* =========================================
+   22. FOOTER
+========================================= */
+
+.pm-workspace-text {
+  margin: 16px 0;
+
+  color: #9bb1d4;
+  text-align: center;
+  font-size: 11px;
+}
+
+.pm-footer {
+  padding-top: 14px;
+
+  border-top: 1px solid #263c5d;
+
+  color: #8ea5ca;
+  text-align: center;
+  font-size: 10px;
+}
+
+
+/* =========================================
+   23. LIGHT THEME
+========================================= */
+
+.pm-theme-light {
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(90, 150, 255, 0.13),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 90% 90%,
+      rgba(90, 150, 255, 0.12),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      #edf3fc,
+      #f8faff,
+      #eaf1fc
+    );
+
+  color: #172b4d;
+}
+
+.pm-theme-light .pm-login-container {
+  background: #fff;
+  border-color: #d7e3f5;
+
+  box-shadow:
+    0 25px 70px rgba(35, 70, 120, 0.12),
+    0 0 25px rgba(40, 100, 239, 0.05);
+}
+
+.pm-theme-light .pm-hero-section {
+  background:
+    radial-gradient(
+      circle at 85% 40%,
+      rgba(65, 130, 255, 0.13),
+      transparent 38%
+    ),
+    linear-gradient(
+      135deg,
+      #f0f5ff,
+      #e7efff 65%,
+      #dce9ff
+    );
+
+  border-right-color: #d5e2f5;
+}
+
+.pm-theme-light .pm-brand h2,
+.pm-theme-light .pm-form-brand h2 {
+  color: #172b4d;
+}
+
+.pm-theme-light .pm-hero-text h1 {
+  color: #172b4d;
+}
+
+.pm-theme-light .pm-hero-text h1 span {
+  color: #2869e8;
+}
+
+.pm-theme-light .pm-hero-text > p {
+  color: #536987;
+}
+
+.pm-theme-light .pm-portal-badge {
+  background: #e3edff;
+  border-color: #c4d8fb;
+  color: #2864c9;
+}
+
+.pm-theme-light .pm-feature {
+  color: #304765;
+}
+
+.pm-theme-light .pm-feature-icon {
+  background: linear-gradient(145deg, #397be8, #2055bd);
+  border-color: #83aef4;
+}
+
+.pm-theme-light .pm-tagline {
+  color: #536b91;
+}
+
+.pm-theme-light .pm-form-section {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(75, 135, 235, 0.08),
+      transparent 35%
+    ),
+    linear-gradient(
+      145deg,
+      #fff,
+      #f6f9ff
+    );
+}
+
+.pm-theme-light .pm-theme-toggle {
+  background: #eaf1ff;
+  border-color: #cbdaf1;
+  color: #2856a0;
+}
+
+.pm-theme-light .pm-theme-toggle:hover {
+  background: #dce9ff;
+  border-color: #3984ff;
+}
+
+.pm-theme-light .pm-welcome h1 {
+  color: #172b4d;
+}
+
+.pm-theme-light .pm-welcome p {
+  color: #647894;
+}
+
+.pm-theme-light .pm-welcome > span {
+  color: #2869d9;
+}
+
+.pm-theme-light .pm-input-group label {
+  color: #263d5d;
+}
+
+.pm-theme-light .pm-input-box {
+  background: #f1f5fc;
+  border-color: #d5e0ef;
+}
+
+.pm-theme-light .pm-input-box:hover {
+  border-color: #9bb7e4;
+}
+
+.pm-theme-light .pm-input-box:focus-within {
+  background: #fff;
+  border-color: #3984ff;
+
+  box-shadow: 0 0 0 3px rgba(40, 100, 239, 0.12);
+}
+
+.pm-theme-light .pm-input-box > span {
+  background: #e7eef9;
+  color: #52739f;
+}
+
+.pm-theme-light .pm-input-box input {
+  color: #172b4d;
+}
+
+.pm-theme-light .pm-input-box input::placeholder {
+  color: #8496b0;
+}
+
+.pm-theme-light .pm-show-password {
+  background: #e4edfc;
+  color: #2869d9;
+}
+
+.pm-theme-light .pm-show-password:hover {
+  background: #d2e2fc;
+  color: #174da9;
+}
+
+.pm-theme-light .pm-remember-label {
+  color: #455b79;
+}
+
+.pm-theme-light .pm-forgot {
+  color: #2869d9;
+}
+
+.pm-theme-light .pm-forgot:hover {
+  color: #174da9;
+}
+
+.pm-theme-light .pm-or {
+  color: #71839c;
+}
+
+.pm-theme-light .pm-or span {
+  background: #d8e1ee;
+}
+
+.pm-theme-light .pm-secure {
+  color: #345276;
+  border-color: #cbd9ed;
+}
+
+.pm-theme-light .pm-secure:hover {
+  background: #eaf1ff;
+  border-color: #3984ff;
+}
+
+.pm-theme-light .pm-workspace-text {
+  color: #71839c;
+}
+
+.pm-theme-light .pm-footer {
+  border-top-color: #dce5f0;
+  color: #8493a9;
+}
+
+.pm-theme-light .pm-error-message {
+  background: #fff0f0;
+  border-color: #f2caca;
+  color: #d43838;
+}
+
+
+/* =========================================
+   24. TABLET
+========================================= */
+
+@media (max-width: 1100px) and (min-width: 751px) {
+  .pm-login-container {
+    grid-template-columns: minmax(0, 1.2fr) minmax(350px, 1fr);
+  }
+
+  .pm-hero-section {
+    padding: 30px 25px 65px;
+  }
+
+  .pm-form-section {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .pm-hero-content {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .pm-hero-text h1 {
+    font-size: 36px;
+  }
+
+  .pm-hero-text > p {
+    max-width: 400px;
+  }
+
+  .pm-workspace {
+    height: 270px;
+  }
+
+  .pm-workspace-image {
+    width: 100%;
+    height: 110%;
+    max-width: 420px;
+  }
+
+  .pm-tagline {
+    left: 25px;
+  }
+}
+
+
+/* =========================================
+   25. MOBILE
+========================================= */
+
+@media (max-width: 750px) {
+  .pm-login-page {
+    padding: 12px;
+    align-items: flex-start;
+  }
+
+  .pm-login-container {
+    display: flex;
+    flex-direction: column;
+
+    min-height: auto;
+    border-radius: 20px;
+  }
+
+  .pm-hero-section {
+    min-height: auto;
+    padding: 30px 25px 70px;
+
+    border-right: none;
+    border-bottom: 1px solid rgba(86, 139, 255, 0.2);
+  }
+
+  .pm-hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 15px;
+  }
+
+  .pm-hero-text h1 {
+    font-size: 40px;
+  }
+
+  .pm-hero-text > p {
+    max-width: 450px;
+  }
+
+  .pm-workspace {
+    width: 100%;
+    height: 340px;
+    margin: 0;
+  }
+
+  .pm-workspace-image {
+    width: 108%;
+    height: 108%;
+    max-width: 500px;
+    transform: scale(1.02);
+  }
+
+  .pm-workspace-image:hover {
+    transform: scale(1.05);
+  }
+
+  .pm-form-section {
+    padding: 90px 30px 35px;
+  }
+
+  .pm-tagline {
+    bottom: 23px;
+    left: 25px;
+  }
+
+  .pm-welcome h1 {
+    font-size: 28px;
+  }
+}
+
+
+/* =========================================
+   26. SMALL MOBILE
+========================================= */
+
+@media (max-width: 420px) {
+  .pm-login-page {
+    padding: 8px;
+  }
+
+  .pm-login-container {
+    border-radius: 17px;
+  }
+
+  .pm-hero-section {
+    padding: 25px 18px 65px;
+  }
+
+  .pm-brand h2 {
+    font-size: 20px;
+  }
+
+  .pm-logo {
+    width: 42px;
+    height: 44px;
+    font-size: 35px;
+  }
+
+  .pm-hero-text h1 {
+    font-size: 34px;
+  }
+
+  .pm-hero-text > p {
+    font-size: 13px;
+  }
+
+  .pm-workspace {
+    height: 270px;
+  }
+
+  .pm-workspace-image {
+    width: 110%;
+    height: 110%;
+  }
+
+  .pm-form-section {
+    padding: 85px 18px 30px;
+  }
+
+  .pm-form-brand h2 {
+    font-size: 20px;
+  }
+
+  .pm-welcome h1 {
+    font-size: 24px;
+  }
+
+  .pm-welcome p {
+    font-size: 12px;
+  }
+
+  .pm-form-options {
+    gap: 14px;
+  }
+
+  .pm-tagline {
+    font-size: 8px;
+    gap: 7px;
+  }
+
+  .pm-input-box {
+    height: 51px;
+  }
+
+  .pm-show-password {
+    padding: 0 12px;
+  }
+
+  .pm-theme-toggle {
+    top: 12px;
+    right: 12px;
+    padding: 7px 10px;
+  }
+}
+
+
+/* =========================================
+   27. SHORT DESKTOP SCREEN
+========================================= */
+
+@media (min-width: 751px) and (max-height: 820px) {
+  .pm-login-container {
+    min-height: 720px;
+  }
+
+  .pm-hero-section {
+    min-height: 720px;
+    padding-top: 25px;
+    padding-bottom: 60px;
+  }
+
+  .pm-hero-content {
+    margin-top: 18px;
+  }
+
+  .pm-workspace {
+    height: clamp(300px, 35vh, 400px);
+  }
+
+  .pm-form-section {
+    padding-top: 75px;
+    padding-bottom: 20px;
+  }
+
+  .pm-form-brand {
+    margin-bottom: 17px;
+  }
+
+  .pm-welcome {
+    margin-bottom: 21px;
+  }
+
+  .pm-welcome h1 {
+    margin-top: 12px;
+  }
+
+  .pm-input-group {
+    margin-bottom: 16px;
+  }
+
+  .pm-form-options {
+    margin-bottom: 19px;
+  }
+
+  .pm-or {
+    margin-top: 17px;
+    margin-bottom: 14px;
+  }
+
+  .pm-workspace-text {
+    margin: 12px 0;
+  }
+}
+
+
+/* =========================================
+   28. ACCESSIBILITY
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

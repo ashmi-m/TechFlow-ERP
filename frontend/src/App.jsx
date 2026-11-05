@@ -76,7 +76,7 @@ import EmployeeManagement from "./pages/EmployeeManagement";
 import AddEmployee from "./pages/AddEmployee";
 import ViewEmployee from "./pages/ViewEmployee";
 import DepartmentManagement from "./pages/DepartmentManagement";
-
+import Projectmanagerlogin from "./pages/Projectmanagerlogin";
 function App() {
   return (
     <BrowserRouter>
@@ -85,7 +85,7 @@ function App() {
         <Route path="/" element={<Login />} />
 
         {/* Admin Routes */}
-        <Route element={<ProtectedRoute allowedRoles={["Admin"]} />}>
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/employees" element={<EmployeeManagement />} />
           <Route path="/employees/add" element={<AddEmployee />} />
@@ -94,7 +94,7 @@ function App() {
         </Route>
 
         {/* Project Manager Routes */}
-        <Route element={<ProtectedRoute allowedRoles={["Project Manager"]} />}>
+        <Route element={<ProtectedRoute allowedRoles={["project_manager"]} />}>
           <Route
             path="/project-manager/dashboard"
             element={<ProjectManagerDashboard />}
@@ -102,12 +102,16 @@ function App() {
         </Route>
 
         {/* Employee Routes */}
-        <Route element={<ProtectedRoute allowedRoles={["Employee"]} />}>
+        <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
           <Route
             path="/employee/dashboard"
             element={<EmployeeDashboard />}
           />
         </Route>
+        <Route
+  path="/project-manager/login"
+  element={<Projectmanagerlogin />}
+/>
 
         {/* Unknown Routes */}
         <Route path="*" element={<Navigate to="/" replace />} />

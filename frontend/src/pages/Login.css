@@ -1,7 +1,7 @@
 
-/* ================================
-   GLOBAL STYLES
-================================ */
+/* =========================================
+   1. GLOBAL STYLES
+========================================= */
 
 * {
   box-sizing: border-box;
@@ -13,12 +13,25 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 
-  --primary: #2864f0;
-  --primary-dark: #174bd1;
-  --text-main: #172033;
-  --text-muted: #718096;
-  --border: #e1e8f3;
-  --panel: #ffffff;
+  --primary: #3478ff;
+  --primary-dark: #1e5de0;
+  --primary-light: #60a5ff;
+
+  --bg-main: #06132b;
+  --bg-panel: #0b1b38;
+  --bg-input: #263d5e;
+
+  --text-main: #f5f8ff;
+  --text-muted: #a7b9d8;
+
+  --border: #2b4266;
+
+  --transition: 0.25s ease;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
 }
 
 body {
@@ -39,40 +52,51 @@ button {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible {
-  outline: 3px solid #7da7ff;
+  outline: 3px solid #78aaff;
   outline-offset: 3px;
 }
 
-/* ================================
-   PAGE BACKGROUND
-================================ */
+/* =========================================
+   2. MAIN PAGE
+========================================= */
 
 .login-page {
   min-height: 100vh;
   padding: 30px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   overflow: hidden;
 
   background:
     radial-gradient(
-      circle at 10% 10%,
-      rgba(82, 139, 255, 0.12),
+      circle at 12% 12%,
+      rgba(36, 102, 225, 0.22),
       transparent 32%
     ),
-    linear-gradient(135deg, #eef3fc, #e8effb);
+    radial-gradient(
+      circle at 90% 90%,
+      rgba(30, 91, 210, 0.15),
+      transparent 35%
+    ),
+    linear-gradient(135deg, #06132b, #081b3a);
 
   color: var(--text-main);
-  transition: background 0.3s ease, color 0.3s ease;
+
+  transition:
+    background var(--transition),
+    color var(--transition);
 }
 
-/* ================================
-   MAIN LOGIN CONTAINER
-================================ */
+/* =========================================
+   3. MAIN CONTAINER
+========================================= */
 
 .login-container {
   position: relative;
+
   display: grid;
   grid-template-columns: 1.08fr 0.92fr;
 
@@ -81,68 +105,85 @@ input:focus-visible {
   min-height: 740px;
 
   overflow: hidden;
-  background: var(--panel);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
+
+  background: #0c1d39;
+
+  border: 1px solid rgba(103, 153, 237, 0.2);
+  border-radius: 22px;
 
   box-shadow:
-    0 30px 80px rgba(36, 64, 112, 0.12),
-    0 4px 15px rgba(36, 64, 112, 0.05);
+    0 30px 90px rgba(0, 0, 0, 0.4),
+    0 0 40px rgba(35, 103, 230, 0.08);
 }
 
-/* ================================
-   LEFT PANEL
-================================ */
+/* =========================================
+   4. LEFT PANEL
+========================================= */
 
 .login-intro {
   position: relative;
   isolation: isolate;
+
   min-width: 0;
+
   padding: 42px 46px 35px;
+
   overflow: hidden;
 
   background:
     radial-gradient(
-      circle at 80% 82%,
-      rgba(76, 136, 255, 0.13),
-      transparent 32%
+      circle at 85% 80%,
+      rgba(41, 109, 238, 0.19),
+      transparent 35%
     ),
-    linear-gradient(145deg, #fbfdff 0%, #f2f7ff 100%);
+    linear-gradient(
+      145deg,
+      #07152f 0%,
+      #0b2045 55%,
+      #102b59 100%
+    );
 }
-
-/* Subtle decorative background */
 
 .login-intro::before {
   content: "";
+
   position: absolute;
   z-index: -1;
-  width: 360px;
-  height: 360px;
+
+  width: 390px;
+  height: 390px;
+
   right: -190px;
-  top: 150px;
+  top: 145px;
+
+  border: 1px solid rgba(92, 149, 255, 0.17);
   border-radius: 50%;
-  border: 1px solid rgba(40, 100, 240, 0.09);
 }
 
 .login-intro::after {
   content: "";
+
   position: absolute;
   z-index: -1;
-  width: 250px;
-  height: 250px;
+
+  width: 280px;
+  height: 280px;
+
   right: -140px;
   bottom: -130px;
+
   border-radius: 50%;
-  background: rgba(83, 143, 255, 0.08);
+
+  background: rgba(53, 119, 255, 0.10);
 }
 
-/* ================================
-   BRAND HEADER
-================================ */
+/* =========================================
+   5. BRAND HEADER
+========================================= */
 
 .brand-header {
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 .brand {
@@ -150,7 +191,7 @@ input:focus-visible {
   align-items: center;
   gap: 12px;
 
-  color: var(--text-main);
+  color: #ffffff;
   text-decoration: none;
 }
 
@@ -161,107 +202,131 @@ input:focus-visible {
   width: 36px;
   height: 42px;
 
-  color: var(--primary);
+  color: #378aff;
+
   font-size: 39px;
   font-weight: 900;
   line-height: 1;
+
+  text-shadow: 0 0 18px rgba(48, 129, 255, 0.35);
 }
 
 .brand-name {
+  color: #f5f8ff;
+
   font-size: 21px;
   font-weight: 750;
   letter-spacing: -0.6px;
 }
 
 .brand-name strong {
-  color: var(--primary);
+  color: #438cff;
 }
 
 .brand-tagline {
   margin: 8px 0 0 48px;
-  color: #78869e;
+
+  color: #91a9cf;
+
   font-size: 11px;
   letter-spacing: 0.1px;
 }
 
 .brand-tagline span {
-  color: var(--primary);
   padding: 0 2px;
+  color: #3985ff;
 }
 
-/* ================================
-   INTRO CONTENT
-================================ */
+/* =========================================
+   6. INTRO CONTENT
+========================================= */
 
 .intro-content {
   position: relative;
   z-index: 2;
-  margin-top: 65px;
+
+  margin-top: 55px;
+
   max-width: 610px;
 }
 
 .intro-badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
 
-  margin-bottom: 17px;
-  padding: 8px 12px;
+  margin-bottom: 19px;
+  padding: 10px 15px;
 
-  border: 1px solid #dce8ff;
+  border: 1px solid rgba(94, 151, 255, 0.28);
   border-radius: 30px;
-  background: rgba(255, 255, 255, 0.75);
 
-  color: #526a94;
+  background: rgba(27, 59, 105, 0.58);
+
+  color: #c5d9ff;
+
   font-size: 11px;
   font-weight: 600;
+
+  backdrop-filter: blur(10px);
 }
 
 .status-dot,
 .footer-dot {
   width: 7px;
   height: 7px;
+
   flex-shrink: 0;
+
   border-radius: 50%;
-  background: #3ebd86;
-  box-shadow: 0 0 0 4px rgba(62, 189, 134, 0.12);
+
+  background: #37d69b;
+
+  box-shadow: 0 0 0 4px rgba(55, 214, 155, 0.12);
 }
 
 .intro-content h1 {
   margin: 0;
-  color: #172033;
+
+  color: #f6f8ff;
 
   font-size: clamp(36px, 3.2vw, 49px);
   line-height: 1.13;
-  font-weight: 800;
+
+  font-weight: 850;
   letter-spacing: -2px;
 }
 
 .intro-content h1 span {
-  color: var(--primary);
+  color: #428aff;
+
+  text-shadow: 0 0 24px rgba(50, 123, 255, 0.2);
 }
 
 .intro-description {
   max-width: 485px;
-  margin: 20px 0 26px;
 
-  color: #6f7f98;
+  margin: 20px 0 25px;
+
+  color: #a7b9d7;
+
   font-size: 13px;
   line-height: 1.9;
 }
 
 .intro-description strong {
-  color: #263751;
-  font-weight: 700;
+  color: #e6efff;
+  font-weight: 750;
 }
 
-/* ================================
-   FEATURES
-================================ */
+/* =========================================
+   7. FEATURE LIST
+========================================= */
 
 .feature-list {
   display: grid;
-  gap: 12px;
+  gap: 11px;
+
   max-width: 450px;
 }
 
@@ -275,31 +340,42 @@ input:focus-visible {
 
   border: 1px solid transparent;
   border-radius: 12px;
+
   transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
+    background var(--transition),
+    border-color var(--transition),
+    transform var(--transition);
 }
 
 .feature-item:hover {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: #e4ecfa;
+  background: rgba(54, 93, 151, 0.20);
+
+  border-color: rgba(98, 151, 245, 0.22);
+
   transform: translateX(4px);
 }
 
 .feature-icon {
   display: grid;
   place-items: center;
+
   flex-shrink: 0;
 
   width: 43px;
   height: 43px;
 
-  border: 1px solid #e2eaff;
+  border: 1px solid rgba(85, 145, 255, 0.28);
   border-radius: 12px;
 
-  background: linear-gradient(145deg, #ffffff, #e8f0ff);
-  color: var(--primary);
+  background: linear-gradient(
+    145deg,
+    #1d3e70,
+    #102b53
+  );
+
+  color: #69a5ff;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
 }
 
 .feature-icon svg {
@@ -309,37 +385,44 @@ input:focus-visible {
 
 .feature-item h3 {
   margin: 0 0 5px;
-  color: #1c2940;
+
+  color: #edf3ff;
+
   font-size: 13px;
   font-weight: 750;
 }
 
 .feature-item p {
   margin: 0;
-  color: #7a879c;
+
+  color: #91a8cc;
+
   font-size: 11px;
   line-height: 1.6;
 }
 
-/* ================================
-   TEAM ILLUSTRATION
-================================ */
+/* =========================================
+   8. TEAM ILLUSTRATION
+========================================= */
 
 .illustration-decoration {
   position: absolute;
   z-index: 0;
+
   right: 12px;
   bottom: 80px;
 
   width: 245px;
   height: 245px;
+
   pointer-events: none;
 }
 
 .decoration-orbit {
   position: absolute;
   inset: 0;
-  border: 1px solid rgba(40, 100, 240, 0.14);
+
+  border: 1px solid rgba(82, 146, 255, 0.24);
   border-radius: 50%;
 }
 
@@ -349,13 +432,15 @@ input:focus-visible {
 
 .orbit-two {
   transform: scale(1.28);
+
   border-style: dashed;
-  opacity: 0.65;
+  opacity: 0.55;
 }
 
 .team-illustration {
   position: absolute;
   z-index: 1;
+
   right: -12px;
   bottom: 76px;
 
@@ -364,40 +449,46 @@ input:focus-visible {
 
   width: 250px;
   height: 250px;
-  padding: 12px;
+  padding: 10px;
 
   overflow: hidden;
-  border: 7px solid rgba(255, 255, 255, 0.95);
+
+  border: 6px solid rgba(96, 150, 245, 0.27);
   border-radius: 50%;
 
-  background: linear-gradient(145deg, #e5efff, #b9d3ff);
+  background: linear-gradient(
+    145deg,
+    #254a82,
+    #102b55
+  );
 
   box-shadow:
-    0 20px 45px rgba(35, 74, 140, 0.16),
-    0 0 0 1px rgba(40, 100, 240, 0.06);
+    0 20px 45px rgba(0, 0, 0, 0.30),
+    0 0 35px rgba(47, 119, 255, 0.13);
 }
 
 .team-image {
   display: block;
+
   width: 100%;
   height: 100%;
 
   border-radius: 50%;
+
   object-fit: cover;
   object-position: center;
 
-  transition: transform 0.35s ease;
+  transition: transform 0.4s ease;
 }
 
 .team-illustration:hover .team-image {
-  transform: scale(1.04);
+  transform: scale(1.06);
 }
-
-/* Decorative caption */
 
 .illustration-caption {
   position: absolute;
   z-index: 2;
+
   right: 225px;
   bottom: 55px;
 
@@ -405,7 +496,8 @@ input:focus-visible {
   flex-direction: column;
   gap: 2px;
 
-  color: var(--primary);
+  color: #448aff;
+
   font-size: 20px;
   font-style: italic;
   font-weight: 800;
@@ -417,16 +509,22 @@ input:focus-visible {
 .caption-underline {
   width: 68px;
   height: 3px;
+
   margin-top: 5px;
+
   border-radius: 3px;
-  background: var(--primary);
+
+  background: #448aff;
 }
 
-/* Footer on left panel */
+/* =========================================
+   9. LEFT FOOTER
+========================================= */
 
 .intro-footer {
   position: absolute;
   z-index: 2;
+
   left: 46px;
   bottom: 24px;
 
@@ -434,37 +532,56 @@ input:focus-visible {
   align-items: center;
   gap: 9px;
 
-  color: #8b97aa;
+  color: #91a8ca;
+
   font-size: 10px;
 }
 
 .intro-footer .footer-dot {
   width: 6px;
   height: 6px;
+
   box-shadow: none;
 }
 
-/* ================================
-   RIGHT PANEL
-================================ */
+/* =========================================
+   10. RIGHT LOGIN PANEL
+========================================= */
 
 .login-form-section {
   position: relative;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
   min-width: 0;
+
   padding: 75px 55px 35px;
 
-  background: #ffffff;
-  border-left: 1px solid #edf1f7;
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(54, 110, 210, 0.12),
+      transparent 45%
+    ),
+    linear-gradient(
+      160deg,
+      #102440,
+      #0b1b34 65%,
+      #09172e
+    );
+
+  border-left: 1px solid rgba(96, 145, 220, 0.16);
 }
 
-/* Theme button */
+/* =========================================
+   11. THEME TOGGLE
+========================================= */
 
 .theme-toggle {
   position: absolute;
+
   top: 27px;
   right: 27px;
 
@@ -474,37 +591,45 @@ input:focus-visible {
 
   padding: 10px 14px;
 
-  border: 1px solid #e3e9f3;
+  border: 1px solid #344b6d;
   border-radius: 30px;
 
-  background: #ffffff;
-  color: #526079;
+  background: #192f4e;
+
+  color: #d7e5ff;
 
   cursor: pointer;
+
   font-size: 11px;
   font-weight: 600;
 
-  transition: all 0.2s ease;
+  transition: all var(--transition);
 }
 
 .theme-toggle:hover {
-  border-color: #b8ccff;
-  background: #f4f7ff;
-  color: var(--primary);
+  border-color: #5794ff;
+
+  background: #23416b;
+
+  color: #ffffff;
+
+  transform: translateY(-2px);
 }
 
 .theme-toggle span {
   font-size: 16px;
 }
 
-/* ================================
-   LOGIN FORM CONTENT
-================================ */
+/* =========================================
+   12. FORM CONTENT
+========================================= */
 
 .form-content {
   width: 100%;
   max-width: 390px;
+
   margin: auto;
+
   text-align: center;
 }
 
@@ -521,32 +646,42 @@ input:focus-visible {
   width: 43px;
   height: 43px;
 
-  color: var(--primary);
+  color: #428aff;
+
   font-size: 45px;
   font-weight: 900;
   line-height: 1;
+
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.25);
 }
 
 .form-brand h2 {
   margin: 6px 0 0;
+
+  color: #f3f7ff;
+
   font-size: 17px;
   font-weight: 800;
   letter-spacing: -0.4px;
 }
 
 .form-brand h2 span {
-  color: var(--primary);
+  color: #428aff;
 }
 
-/* Welcome section */
+/* =========================================
+   13. WELCOME SECTION
+========================================= */
 
 .welcome-section {
   margin-top: 30px;
 }
 
 .welcome-badge {
-  margin-bottom: 9px;
-  color: #6f8bc2;
+  margin-bottom: 10px;
+
+  color: #70a5ff;
+
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 2px;
@@ -554,7 +689,9 @@ input:focus-visible {
 
 .welcome-section h3 {
   margin: 0;
-  color: #18243a;
+
+  color: #f5f8ff;
+
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.8px;
@@ -562,14 +699,16 @@ input:focus-visible {
 
 .form-subtitle {
   margin: 10px 0 28px;
-  color: #8793a7;
+
+  color: #a4b6d2;
+
   font-size: 12px;
   line-height: 1.7;
 }
 
-/* ================================
-   INPUT FIELDS
-================================ */
+/* =========================================
+   14. LOGIN FORM
+========================================= */
 
 .login-form {
   text-align: left;
@@ -581,12 +720,16 @@ input:focus-visible {
 
 .form-group > label {
   display: block;
+
   margin-bottom: 8px;
 
-  color: #394760;
+  color: #dce8fb;
+
   font-size: 11px;
   font-weight: 700;
 }
+
+/* INPUT BOX */
 
 .input-field {
   display: flex;
@@ -594,29 +737,35 @@ input:focus-visible {
   gap: 12px;
 
   width: 100%;
-  height: 51px;
+  height: 53px;
+
   padding: 0 15px;
 
-  border: 1px solid #dfe6f1;
+  border: 1px solid #3a5377;
   border-radius: 10px;
 
-  background: #ffffff;
-  color: #8996ab;
+  background: #263d5e;
+
+  color: #a9c2e9;
 
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
+    border-color var(--transition),
+    box-shadow var(--transition),
+    background var(--transition);
 }
 
 .input-field:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(40, 100, 240, 0.09);
+  border-color: #438aff;
+
+  background: #2b4569;
+
+  box-shadow: 0 0 0 4px rgba(52, 120, 255, 0.13);
 }
 
 .input-field > svg {
   width: 18px;
   height: 18px;
+
   flex-shrink: 0;
 }
 
@@ -626,48 +775,57 @@ input:focus-visible {
   height: 100%;
 
   padding: 0;
+
   border: none;
   outline: none;
 
   background: transparent;
-  color: #1b2940;
+
+  color: #ffffff;
 
   font-size: 12px;
 }
 
 .input-field input::placeholder {
-  color: #a0aabd;
+  color: #a3b4cd;
 }
 
 .input-field input:focus-visible {
   outline: none;
 }
 
+/* PASSWORD TOGGLE */
+
 .password-toggle {
   flex-shrink: 0;
+
   padding: 6px 0 6px 8px;
 
   border: none;
+
   background: transparent;
-  color: var(--primary);
+
+  color: #65a1ff;
 
   cursor: pointer;
+
   font-size: 11px;
   font-weight: 700;
 }
 
 .password-toggle:hover {
-  color: var(--primary-dark);
+  color: #ffffff;
 }
 
-/* ================================
-   FORM OPTIONS
-================================ */
+/* =========================================
+   15. FORM OPTIONS
+========================================= */
 
 .form-options {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 12px;
 
   margin: 19px 0 23px;
@@ -678,16 +836,21 @@ input:focus-visible {
   align-items: center;
   gap: 8px;
 
-  color: #536078;
+  color: #c4d2e8;
+
   cursor: pointer;
+
   font-size: 11px;
 }
 
 .remember-option input {
   width: 15px;
   height: 15px;
+
   margin: 0;
-  accent-color: var(--primary);
+
+  accent-color: #3478ff;
+
   cursor: pointer;
 }
 
@@ -695,108 +858,163 @@ input:focus-visible {
   padding: 5px 0;
 
   border: none;
+
   background: transparent;
-  color: var(--primary);
+
+  color: #66a1ff;
 
   cursor: pointer;
+
   font-size: 11px;
   font-weight: 700;
 }
 
 .forgot-password:hover {
-  color: var(--primary-dark);
+  color: #a4c9ff;
   text-decoration: underline;
 }
 
-/* ================================
-   SIGN IN BUTTON
-================================ */
+/* =========================================
+   16. ERROR MESSAGE
+========================================= */
+
+.login-error {
+  margin: 8px 0 14px;
+  padding: 11px 13px;
+
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 8px;
+
+  background: rgba(220, 38, 38, 0.12);
+
+  color: #ff9b9b;
+
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* =========================================
+   17. SIGN IN BUTTON
+========================================= */
 
 .sign-in-button {
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 12px;
 
   width: 100%;
-  min-height: 51px;
+  min-height: 53px;
+
   padding: 12px 18px;
 
   border: none;
-  border-radius: 10px;
+  border-radius: 11px;
 
-  background: linear-gradient(105deg, #3474fa, #2458e8);
+  background: linear-gradient(
+    105deg,
+    #347bff,
+    #2459ed
+  );
+
   color: #ffffff;
 
   cursor: pointer;
+
   font-size: 13px;
   font-weight: 750;
 
-  box-shadow: 0 8px 18px rgba(40, 100, 240, 0.18);
+  box-shadow: 0 9px 23px rgba(32, 96, 230, 0.28);
 
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
+    transform var(--transition),
+    box-shadow var(--transition),
+    background var(--transition);
 }
 
-.sign-in-button:hover {
-  background: linear-gradient(105deg, #245fe9, #1949cf);
-  box-shadow: 0 11px 24px rgba(40, 100, 240, 0.26);
-  transform: translateY(-1px);
+.sign-in-button:hover:not(:disabled) {
+  background: linear-gradient(
+    105deg,
+    #488cff,
+    #2867f4
+  );
+
+  box-shadow: 0 12px 28px rgba(39, 105, 245, 0.38);
+
+  transform: translateY(-2px);
 }
 
-.sign-in-button:active {
+.sign-in-button:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.sign-in-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 .sign-in-arrow {
   font-size: 18px;
-  transition: transform 0.2s ease;
+
+  transition: transform var(--transition);
 }
 
-.sign-in-button:hover .sign-in-arrow {
+.sign-in-button:hover:not(:disabled) .sign-in-arrow {
   transform: translateX(4px);
 }
 
 .secure-note {
   margin: 13px 0 0;
-  color: #9aa5b7;
+
+  color: #8fa5c6;
+
   text-align: center;
+
   font-size: 10px;
 }
 
-/* ================================
-   DIVIDER AND SOCIAL BUTTONS
-================================ */
+/* =========================================
+   18. DIVIDER
+========================================= */
 
 .divider {
   display: flex;
   align-items: center;
+
   gap: 13px;
 
   margin: 25px 0 20px;
 
-  color: #929eb0;
+  color: #9aacc7;
+
   font-size: 10px;
 }
 
 .divider::before,
 .divider::after {
   content: "";
+
   flex: 1;
+
   height: 1px;
-  background: #e8edf4;
+
+  background: #344965;
 }
 
 .divider span {
   white-space: nowrap;
 }
 
+/* =========================================
+   19. SOCIAL BUTTONS
+========================================= */
+
 .social-buttons {
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 15px;
 }
 
@@ -807,23 +1025,23 @@ input:focus-visible {
   width: 43px;
   height: 43px;
 
-  border: 1px solid #e2e8f1;
+  border: 1px solid #3b5272;
   border-radius: 50%;
 
-  background: #ffffff;
-  color: #394760;
+  background: #1a304f;
+
+  color: #d9e7ff;
 
   cursor: pointer;
 
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    background 0.2s ease;
+  transition: all var(--transition);
 }
 
 .social-buttons button:hover {
-  border-color: #a9c1ff;
-  background: #f3f7ff;
+  border-color: #659aff;
+
+  background: #29466f;
+
   transform: translateY(-3px);
 }
 
@@ -833,147 +1051,195 @@ input:focus-visible {
 }
 
 .google-letter {
-  color: #4285f4;
+  color: #70a7ff;
+
   font-size: 17px;
   font-weight: 800;
 }
 
-/* Copyright */
+/* =========================================
+   20. COPYRIGHT
+========================================= */
 
 .copyright {
-  margin: 43px 0 0;
-  color: #9ba5b5;
+  margin: 38px 0 0;
+
+  color: #8298b9;
+
   text-align: center;
+
   font-size: 10px;
   line-height: 1.6;
 }
 
-/* ================================
-   DARK MODE
-================================ */
+/* =========================================
+   21. LIGHT MODE
+========================================= */
 
-.dark-mode {
-  --text-main: #eef3ff;
-  --text-muted: #aebbd0;
-  --panel: #182235;
-
+.light-mode {
   background:
     radial-gradient(
       circle at 10% 10%,
-      rgba(50, 94, 185, 0.18),
-      transparent 35%
+      rgba(82, 139, 255, 0.12),
+      transparent 32%
     ),
-    #101827;
+    linear-gradient(135deg, #eef3fc, #e8effb);
 
-  color: #eef3ff;
+  color: #172033;
 }
 
-.dark-mode .login-container {
-  border-color: #2d3b52;
-  background: #182235;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+.light-mode .login-container {
+  background: #ffffff;
+
+  border-color: rgba(255, 255, 255, 0.9);
+
+  box-shadow: 0 30px 80px rgba(36, 64, 112, 0.12);
 }
 
-.dark-mode .login-intro {
+.light-mode .login-intro {
   background:
     radial-gradient(
       circle at 80% 82%,
-      rgba(67, 117, 223, 0.16),
-      transparent 34%
+      rgba(76, 136, 255, 0.13),
+      transparent 32%
     ),
-    linear-gradient(145deg, #202d42, #18263c);
+    linear-gradient(145deg, #fbfdff, #f2f7ff);
 }
 
-.dark-mode .login-intro::before {
-  border-color: rgba(120, 164, 255, 0.12);
+.light-mode .login-intro::before {
+  border-color: rgba(40, 100, 240, 0.09);
 }
 
-.dark-mode .intro-content h1,
-.dark-mode .feature-item h3,
-.dark-mode .intro-description strong,
-.dark-mode .brand,
-.dark-mode .welcome-section h3 {
-  color: #f0f4ff;
+.light-mode .brand,
+.light-mode .brand-name,
+.light-mode .intro-content h1,
+.light-mode .feature-item h3 {
+  color: #172033;
 }
 
-.dark-mode .brand-tagline,
-.dark-mode .intro-description,
-.dark-mode .feature-item p,
-.dark-mode .intro-footer {
-  color: #a9b8d0;
+.light-mode .brand-tagline,
+.light-mode .intro-description,
+.light-mode .feature-item p,
+.light-mode .intro-footer {
+  color: #78869e;
 }
 
-.dark-mode .intro-badge {
-  border-color: #354a6a;
-  background: rgba(35, 52, 77, 0.8);
-  color: #c3d5f7;
+.light-mode .intro-description strong {
+  color: #263751;
 }
 
-.dark-mode .feature-item:hover {
-  border-color: #344968;
-  background: rgba(38, 57, 83, 0.65);
+.light-mode .intro-badge {
+  border-color: #dce8ff;
+  background: rgba(255, 255, 255, 0.75);
+  color: #526a94;
 }
 
-.dark-mode .feature-icon {
-  border-color: #364d73;
-  background: #263b5c;
+.light-mode .feature-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: #e4ecfa;
 }
 
-.dark-mode .login-form-section {
-  border-left-color: #2a374b;
-  background: #182235;
+.light-mode .feature-icon {
+  border-color: #e2eaff;
+  background: linear-gradient(145deg, #ffffff, #e8f0ff);
+  color: #2864f0;
 }
 
-.dark-mode .theme-toggle,
-.dark-mode .social-buttons button {
-  border-color: #37465d;
-  background: #202e43;
-  color: #dbe6f8;
+.light-mode .team-illustration {
+  border-color: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(145deg, #e5efff, #b9d3ff);
 }
 
-.dark-mode .theme-toggle:hover,
-.dark-mode .social-buttons button:hover {
-  border-color: #638eea;
-  background: #293d5b;
+.light-mode .login-form-section {
+  background: #ffffff;
+  border-left-color: #edf1f7;
 }
 
-.dark-mode .form-group > label,
-.dark-mode .remember-option {
-  color: #d1dbee;
+.light-mode .theme-toggle {
+  border-color: #e3e9f3;
+  background: #ffffff;
+  color: #526079;
 }
 
-.dark-mode .form-subtitle,
-.dark-mode .secure-note,
-.dark-mode .copyright {
-  color: #9eacc2;
+.light-mode .theme-toggle:hover {
+  border-color: #b8ccff;
+  background: #f4f7ff;
+  color: #2864f0;
 }
 
-.dark-mode .input-field {
-  border-color: #3a4961;
-  background: #202d41;
-  color: #b4c2d8;
+.light-mode .form-brand h2,
+.light-mode .welcome-section h3 {
+  color: #18243a;
 }
 
-.dark-mode .input-field input {
-  color: #f0f4ff;
+.light-mode .welcome-badge {
+  color: #6f8bc2;
 }
 
-.dark-mode .input-field input::placeholder {
-  color: #91a0b8;
+.light-mode .form-subtitle {
+  color: #8793a7;
 }
 
-.dark-mode .divider::before,
-.dark-mode .divider::after {
-  background: #354158;
+.light-mode .form-group > label {
+  color: #394760;
 }
 
-.dark-mode .divider {
-  color: #a9b5c9;
+.light-mode .input-field {
+  border-color: #dfe6f1;
+  background: #ffffff;
+  color: #8996ab;
 }
 
-/* ================================
-   TABLET
-================================ */
+.light-mode .input-field:focus-within {
+  border-color: #2864f0;
+  background: #ffffff;
+}
+
+.light-mode .input-field input {
+  color: #1b2940;
+}
+
+.light-mode .input-field input::placeholder {
+  color: #a0aabd;
+}
+
+.light-mode .password-toggle,
+.light-mode .forgot-password {
+  color: #2864f0;
+}
+
+.light-mode .remember-option {
+  color: #536078;
+}
+
+.light-mode .secure-note,
+.light-mode .copyright {
+  color: #9aa5b7;
+}
+
+.light-mode .divider {
+  color: #929eb0;
+}
+
+.light-mode .divider::before,
+.light-mode .divider::after {
+  background: #e8edf4;
+}
+
+.light-mode .social-buttons button {
+  border-color: #e2e8f1;
+  background: #ffffff;
+  color: #394760;
+}
+
+.light-mode .social-buttons button:hover {
+  border-color: #a9c1ff;
+  background: #f3f7ff;
+}
+
+/* =========================================
+   22. TABLET
+========================================= */
 
 @media (max-width: 1100px) {
   .login-page {
@@ -990,7 +1256,7 @@ input:focus-visible {
   }
 
   .intro-content {
-    margin-top: 55px;
+    margin-top: 45px;
   }
 
   .intro-content h1 {
@@ -1004,6 +1270,7 @@ input:focus-visible {
   .team-illustration {
     right: -38px;
     bottom: 67px;
+
     width: 195px;
     height: 195px;
   }
@@ -1011,6 +1278,7 @@ input:focus-visible {
   .illustration-decoration {
     right: -12px;
     bottom: 72px;
+
     width: 195px;
     height: 195px;
   }
@@ -1018,6 +1286,7 @@ input:focus-visible {
   .illustration-caption {
     right: 160px;
     bottom: 44px;
+
     font-size: 17px;
   }
 
@@ -1027,18 +1296,20 @@ input:focus-visible {
   }
 }
 
-/* ================================
-   SMALL TABLET
-================================ */
+/* =========================================
+   23. SMALL TABLET
+========================================= */
 
 @media (max-width: 800px) {
   .login-page {
     padding: 18px;
     align-items: flex-start;
+    overflow: auto;
   }
 
   .login-container {
     grid-template-columns: 1fr;
+
     max-width: 560px;
     min-height: auto;
   }
@@ -1067,6 +1338,7 @@ input:focus-visible {
   .team-illustration {
     right: 20px;
     bottom: 55px;
+
     width: 200px;
     height: 200px;
   }
@@ -1074,6 +1346,7 @@ input:focus-visible {
   .illustration-decoration {
     right: 14px;
     bottom: 60px;
+
     width: 200px;
     height: 200px;
   }
@@ -1090,13 +1363,15 @@ input:focus-visible {
 
   .login-form-section {
     min-height: 720px;
+
     padding: 85px 35px 35px;
+
     border-left: none;
-    border-top: 1px solid #edf1f7;
+    border-top: 1px solid #344965;
   }
 
-  .dark-mode .login-form-section {
-    border-top-color: #2a374b;
+  .light-mode .login-form-section {
+    border-top-color: #edf1f7;
   }
 
   .form-content {
@@ -1109,9 +1384,9 @@ input:focus-visible {
   }
 }
 
-/* ================================
-   MOBILE
-================================ */
+/* =========================================
+   24. MOBILE
+========================================= */
 
 @media (max-width: 480px) {
   .login-page {
@@ -1187,8 +1462,10 @@ input:focus-visible {
   .team-illustration {
     right: 5px;
     bottom: 43px;
+
     width: 145px;
     height: 145px;
+
     padding: 7px;
     border-width: 5px;
   }
@@ -1196,6 +1473,7 @@ input:focus-visible {
   .illustration-decoration {
     right: 0;
     bottom: 46px;
+
     width: 145px;
     height: 145px;
   }
@@ -1213,6 +1491,7 @@ input:focus-visible {
   .intro-footer {
     left: 20px;
     bottom: 18px;
+
     max-width: 185px;
     font-size: 9px;
   }
@@ -1225,6 +1504,7 @@ input:focus-visible {
   .theme-toggle {
     top: 18px;
     right: 17px;
+
     padding: 8px 11px;
     font-size: 10px;
   }
@@ -1270,7 +1550,9 @@ input:focus-visible {
   }
 }
 
-/* Short desktop screens */
+/* =========================================
+   25. SHORT DESKTOP SCREENS
+========================================= */
 
 @media (min-width: 801px) and (max-height: 850px) {
   .login-page {
@@ -1331,5 +1613,20 @@ input:focus-visible {
 
   .copyright {
     margin-top: 30px;
+  }
+}
+
+/* =========================================
+   26. REDUCED MOTION ACCESSIBILITY
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

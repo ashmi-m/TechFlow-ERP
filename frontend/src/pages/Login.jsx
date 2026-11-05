@@ -6,14 +6,14 @@ import "./Login.css";
 const TEAM_IMAGE =
   "https://res.cloudinary.com/dmnfj34up/image/upload/v1792861507/Graphic_Mockup_Right_of_Left_Column.png";
 
-
-
 function Login() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+
+  // Dark mode is enabled by default
+  const [darkMode, setDarkMode] = useState(true);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,8 +45,24 @@ function Login() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.message || "Invalid email or password.");
-        return;
+        throw new Error(
+          data.message || "Invalid email or password."
+        );
+      }
+
+      // Validate user role before storing login information
+      const role = data.user?.role;
+
+     const roleRoutes = {
+  admin: "/dashboard",
+  project_manager: "/project-manager/dashboard",
+  employee: "/employee/dashboard",
+};
+
+      if (!roleRoutes[role]) {
+        throw new Error(
+          "Invalid user role. Please contact the administrator."
+        );
       }
 
       // Save login information
@@ -60,23 +76,16 @@ function Login() {
       otherStorage.removeItem("token");
       otherStorage.removeItem("user");
 
-// Redirect users based on their role
-const role = data.user.role;
+      // Redirect users based on their role
+      navigate(roleRoutes[role], { replace: true });
 
-if (role === "Admin") {
-  navigate("/dashboard", { replace: true });
-} else if (role === "Project Manager") {
-  navigate("/project-manager/dashboard", { replace: true });
-} else if (role === "Employee") {
-  navigate("/employee/dashboard", { replace: true });
-} else {
-  setError("Invalid user role. Please contact the administrator.");
-}
     } catch (err) {
       console.error("Login error:", err);
 
       setError(
-        "Cannot connect to the server. Please make sure the backend is running."
+        err.message === "Failed to fetch"
+          ? "Cannot connect to the server. Please make sure the backend is running."
+          : err.message
       );
     } finally {
       setLoading(false);
@@ -88,12 +97,13 @@ if (role === "Admin") {
   };
 
   return (
-    <main className={`login-page ${darkMode ? "dark-mode" : ""}`}>
+    <main className={`login-page ${darkMode ? "dark-mode" : "light-mode"}`}>
       <div className="login-container">
 
         {/* LEFT PANEL */}
         <section className="login-intro">
 
+          {/* BRAND HEADER */}
           <header className="brand-header">
             <a
               href="#home"
@@ -108,12 +118,13 @@ if (role === "Admin") {
             </a>
 
             <p className="brand-tagline">
-              Work Smarter <span>•</span> Build Together{" "}
-              <span>•</span> Grow Faster
+              Work Smarter <span>•</span> Build Together <span>•</span> Grow Faster
             </p>
           </header>
 
+          {/* INTRO CONTENT */}
           <div className="intro-content">
+
             <div className="intro-badge">
               <span className="status-dot"></span>
               One workspace. Endless possibilities.
@@ -133,6 +144,7 @@ if (role === "Admin") {
               track projects, and bring your entire team together.
             </p>
 
+            {/* FEATURES */}
             <div className="feature-list">
 
               <article className="feature-item">
@@ -233,6 +245,7 @@ if (role === "Admin") {
             <span className="caption-underline"></span>
           </div>
 
+          {/* LEFT FOOTER */}
           <div className="intro-footer">
             <span className="footer-dot"></span>
             Designed for teams that move forward.
@@ -243,6 +256,7 @@ if (role === "Admin") {
         {/* RIGHT PANEL */}
         <section className="login-form-section">
 
+          {/* THEME TOGGLE */}
           <button
             className="theme-toggle"
             type="button"
@@ -252,11 +266,13 @@ if (role === "Admin") {
             <span aria-hidden="true">
               {darkMode ? "☀" : "☾"}
             </span>
+
             {darkMode ? "Light Mode" : "Dark Mode"}
           </button>
 
           <div className="form-content">
 
+            {/* BRAND */}
             <div className="form-brand">
               <div className="form-brand-icon">T</div>
 
@@ -265,6 +281,7 @@ if (role === "Admin") {
               </h2>
             </div>
 
+            {/* WELCOME */}
             <div className="welcome-section">
               <div className="welcome-badge">WELCOME BACK</div>
 
@@ -275,6 +292,7 @@ if (role === "Admin") {
               </p>
             </div>
 
+            {/* LOGIN FORM */}
             <form onSubmit={handleSubmit} className="login-form">
 
               {/* EMAIL */}
@@ -399,17 +417,9 @@ if (role === "Admin") {
 
               </div>
 
-              {/* LOGIN ERROR */}
+              {/* ERROR MESSAGE */}
               {error && (
-                <p
-                  role="alert"
-                  style={{
-                    color: "#dc2626",
-                    fontSize: "13px",
-                    margin: "8px 0",
-                    lineHeight: "1.5",
-                  }}
-                >
+                <p className="login-error" role="alert">
                   {error}
                 </p>
               )}
@@ -419,12 +429,10 @@ if (role === "Admin") {
                 className="sign-in-button"
                 type="submit"
                 disabled={loading}
-                style={{
-                  opacity: loading ? 0.7 : 1,
-                  cursor: loading ? "wait" : "pointer",
-                }}
               >
-                <span>{loading ? "Signing in..." : "Sign In"}</span>
+                <span>
+                  {loading ? "Signing in..." : "Sign In"}
+                </span>
 
                 {!loading && (
                   <span className="sign-in-arrow" aria-hidden="true">
@@ -489,6 +497,7 @@ if (role === "Admin") {
 
             </div>
 
+            {/* COPYRIGHT */}
             <p className="copyright">
               © 2026 TechFlow ERP. All rights reserved.
             </p>
@@ -502,4 +511,3 @@ if (role === "Admin") {
 }
 
 export default Login;
-
