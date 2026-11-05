@@ -740,12 +740,12 @@
   width: 155px;
   height: 155px;
   border-radius: 50%;
-  background: conic-gradient(
-    #8183ef 0% 33%,
-    #3478f6 33% 66%,
-    #20bd8a 66% 83%,
-    #f3a21c 83% 100%
-  );
+   background: conic-gradient(
+  #8183ef 0% 25%,
+  #3478f6 25% 58.33%,
+  #20bd8a 58.33% 83.33%,
+  #f3a21c 83.33% 100%
+);
   display: flex;
   justify-content: center;
   align-items: center;
