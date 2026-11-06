@@ -11,6 +11,7 @@ const authRoutes = require('./routes/authRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const departmentRoutes = require("./routes/departmentRoutes");
 const projectRoutes = require('./routes/projectRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 const { protect, authorize } = require('./middleware/authMiddleware');
 
 const app = express();
@@ -51,6 +52,11 @@ app.use(
   authorize('admin', 'project_manager'),
   projectRoutes
 );
+app.use('/api/tasks', taskRoutes);
+app.get('/api/tasks-debug', (req, res) => {
+  res.json({ message: "Server route is working" });
+});
+
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {

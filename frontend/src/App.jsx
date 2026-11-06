@@ -21,7 +21,8 @@ import DepartmentManagement from "./pages/DepartmentManagement";
 import Projectmanagerlogin from "./pages/Projectmanagerlogin";
 import MyProjects from "./pages/MyProjects";
 import CreateProject from "./pages/CreateProject";
-
+import CreateTask from "./pages/CreateTask";
+import TaskManagement from "./pages/TaskManagement";
 function App() {
   return (
     <BrowserRouter>
@@ -46,26 +47,34 @@ function App() {
         </Route>
 
         {/* Project Manager Routes */}
-        <Route
-          element={
-            <ProtectedRoute allowedRoles={["project_manager"]} />
-          }
-        >
-          <Route
-            path="/project-manager/dashboard"
-            element={<ProjectManagerDashboard />}
-          />
+<Route element={<ProtectedRoute allowedRoles={["project_manager"]} />}>
+  <Route
+    path="/project-manager/dashboard"
+    element={<ProjectManagerDashboard />}
+  />
 
-          <Route
-            path="/project-manager/projects"
-            element={<MyProjects />}
-          />
+  <Route
+    path="/project-manager/projects"
+    element={<MyProjects />}
+  />
 
-          <Route
-            path="/project-manager/create-project"
-            element={<CreateProject />}
-          />
-        </Route>
+  <Route
+    path="/project-manager/create-project"
+    element={<CreateProject />}
+  />
+
+  {/* Task Management */}
+  <Route
+    path="/project-manager/tasks"
+    element={<TaskManagement />}
+  />
+
+  {/* Create Task */}
+  <Route
+    path="/project-manager/tasks/create"
+    element={<CreateTask />}
+  />
+</Route>
 
         {/* Employee Routes */}
         <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
@@ -73,7 +82,9 @@ function App() {
             path="/employee/dashboard"
             element={<EmployeeDashboard />}
           />
+
         </Route>
+
 
         {/* Unknown Routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
