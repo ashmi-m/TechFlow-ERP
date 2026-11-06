@@ -1,14 +1,6 @@
 
 const express = require("express");
 const router = express.Router();
-router.get("/test", (req, res) => {
-  res.json({
-    success: true,
-    message: "Task router is connected successfully",
-  });
-});
-
-console.log("TASK ROUTES FILE LOADED SUCCESSFULLY");
 const Task = require("../models/Task");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
