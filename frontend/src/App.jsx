@@ -23,6 +23,7 @@ import MyProjects from "./pages/MyProjects";
 import CreateProject from "./pages/CreateProject";
 import CreateTask from "./pages/CreateTask";
 import TaskManagement from "./pages/TaskManagement";
+ import EmployeeLogin from "./pages/EmployeeLogin";
 function App() {
   return (
     <BrowserRouter>
@@ -36,6 +37,11 @@ function App() {
           path="/project-manager/login"
           element={<Projectmanagerlogin />}
         />
+        {/* Employee Login */}
+<Route
+  path="/employee/login"
+  element={<EmployeeLogin />}
+/>
 
         {/* Admin Routes */}
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
@@ -62,6 +68,7 @@ function App() {
     path="/project-manager/create-project"
     element={<CreateProject />}
   />
+  
 
   {/* Task Management */}
   <Route
