@@ -1,140 +1,187 @@
-import React, { useMemo, useState } from "react";
+
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import "./EmployeeDashboard.css";
 
-const sampleTasks = [
-  {
-    id: 1,
-    name: "Design Homepage UI",
-    description: "Design responsive homepage layout and sections.",
-    project: "E-commerce Website",
-    priority: "High",
-    dueDate: "22 Oct 2026",
-    status: "Completed",
-  },
-  {
-    id: 2,
-    name: "CRM Dashboard Design",
-    description: "Create dashboard widgets and user interface.",
-    project: "CRM Application",
-    priority: "Medium",
-    dueDate: "24 Oct 2026",
-    status: "To Do",
-  },
-  {
-    id: 3,
-    name: "Update Product Page UI",
-    description: "Improve product cards and layout structure.",
-    project: "E-commerce Website",
-    priority: "High",
-    dueDate: "23 Oct 2026",
-    status: "In Progress",
-  },
-  {
-    id: 4,
-    name: "Create Mobile UI Components",
-    description: "Develop reusable mobile responsive components.",
-    project: "Mobile Application",
-    priority: "Medium",
-    dueDate: "25 Oct 2026",
-    status: "In Progress",
-  },
-  {
-    id: 5,
-    name: "Prepare Design Assets",
-    description: "Prepare UI assets, icons and design resources.",
-    project: "CRM Application",
-    priority: "Low",
-    dueDate: "20 Oct 2026",
-    status: "Overdue",
-  },
-];
 
-const projects = [
-  {
-    id: 1,
-    name: "E-commerce Website",
-    code: "PRJ001",
-    priority: "High Priority",
-    status: "In Progress",
-    role: "UI/UX Designer",
-    manager: "Rahul Sharma",
-    tasks: "4 Tasks",
-    progress: 60,
-    deadline: "30 Nov 2026",
-  },
-  {
-    id: 2,
-    name: "CRM Application",
-    code: "PRJ002",
-    priority: "Medium Priority",
-    status: "In Progress",
-    role: "UI/UX Designer",
-    manager: "Rahul Sharma",
-    tasks: "4 Tasks",
-    progress: 45,
-    deadline: "15 Dec 2026",
-  },
-];
-
-const deadlines = [
-  {
-    name: "Update Product Page UI",
-    project: "E-commerce Website",
-    priority: "High",
-    time: "Tomorrow",
-  },
-  {
-    name: "Create Mobile UI Components",
-    project: "Mobile Application",
-    priority: "Medium",
-    time: "In 2 days",
-  },
-  {
-    name: "CRM Dashboard Design",
-    project: "CRM Application",
-    priority: "Medium",
-    time: "In 5 days",
-  },
-];
-
-const activities = [
-  {
-    title: "You completed the Design Homepage UI task.",
-    time: "Today, 10:30 AM",
-    type: "success",
-  },
-  {
-    title: "Rahul Sharma assigned you a new task: Update Product Page UI.",
-    time: "Yesterday, 2:15 PM",
-    type: "info",
-  },
-  {
-    title: "You updated the progress of a project task to 75%.",
-    time: "2 days ago",
-    type: "info",
-  },
-  {
-    title: "A project deadline is approaching: Update Product Page UI.",
-    time: "3 days ago",
-    type: "warning",
-  },
-];
 
 function EmployeeDashboard() {
   const navigate = useNavigate();
 
   const [activeMenu, setActiveMenu] = useState("Dashboard");
   const [search, setSearch] = useState("");
-  const [tasks, setTasks] = useState(sampleTasks);
+
+  const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
+ const [activities, setActivities] = useState([]);
+const [activitiesLoading, setActivitiesLoading] = useState(true);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [projectsError, setProjectsError] = useState("");
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const [showNotifications, setShowNotifications] = useState(false);
 
   const user = JSON.parse(
     localStorage.getItem("user") ||
-    sessionStorage.getItem("user") ||
-    "{}"
+      sessionStorage.getItem("user") ||
+      "{}"
   );
 
+  const token =
+    localStorage.getItem("token") ||
+    sessionStorage.getItem("token");
+
+  // FETCH EMPLOYEE PROJECTS
+  useEffect(() => {
+    const fetchEmployeeProjects = async () => {
+      try {
+        setProjectsLoading(true);
+        setProjectsError("");
+
+        const response = await fetch(
+          "http://localhost:5000/api/projects/my-projects",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to fetch projects");
+        }
+
+        const formattedProjects = data.projects.map((project) => ({
+          id: project._id,
+          name: project.projectName,
+          code: project.projectCode,
+          priority: `${project.priority} Priority`,
+          status: project.status,
+          role: data.employee.designation,
+          manager: project.projectManager?.name || "Not assigned",
+          tasks: `Team members: ${project.teamMembers?.length || 0}`,
+          progress: project.progress,
+          deadline: project.deadline
+            ? new Date(project.deadline).toLocaleDateString("en-GB")
+            : "Not assigned",
+        }));
+
+        setProjects(formattedProjects);
+      } catch (err) {
+        setProjectsError(err.message);
+      } finally {
+        setProjectsLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchEmployeeProjects();
+    } else {
+      setProjectsError("Please log in again.");
+      setProjectsLoading(false);
+    }
+  }, [token]);
+
+  // FETCH EMPLOYEE TASKS
+  useEffect(() => {
+    const fetchEmployeeTasks = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(
+          "http://localhost:5000/api/tasks/my-tasks",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to fetch tasks");
+        }
+
+        const formattedTasks = data.tasks.map((task) => ({
+          id: task._id,
+          name: task.taskName,
+          description: task.description,
+          project: task.project?.projectName || "No project",
+          priority: task.priority,
+          dueDate: task.dueDate
+            ? new Date(task.dueDate).toLocaleDateString("en-GB")
+            : "Not assigned",
+          dueDateRaw: task.dueDate,
+          status: task.status,
+        }));
+
+        setTasks(formattedTasks);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+
+    if (token) {
+      fetchEmployeeTasks();
+    } else {
+      setError("Please log in again.");
+      setLoading(false);
+    }
+  }, [token]);
+
+  // FETCH EMPLOYEE RECENT ACTIVITIES
+useEffect(() => {
+  const fetchEmployeeActivities = async () => {
+    try {
+      setActivitiesLoading(true);
+
+      const response = await fetch(
+        "http://localhost:5000/api/activities/my-activities",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to fetch activities");
+      }
+
+      setActivities(data.activities);
+    } catch (error) {
+      console.error("Recent Activities Error:", error);
+    } finally {
+      setActivitiesLoading(false);
+    }
+  };
+
+  if (token) {
+    fetchEmployeeActivities();
+  } else {
+    setActivitiesLoading(false);
+  }
+}, [token]);
+
+  // EMPLOYEE DETAILS
   const employeeName =
     user.name ||
     user.fullName ||
@@ -148,6 +195,7 @@ function EmployeeDashboard() {
     .slice(0, 2)
     .toUpperCase();
 
+  // TASK COUNTS
   const completedTasks = tasks.filter(
     (task) => task.status === "Completed"
   ).length;
@@ -156,10 +204,42 @@ function EmployeeDashboard() {
     (task) => task.status === "In Progress"
   ).length;
 
-  const overdueTasks = tasks.filter(
-    (task) => task.status === "Overdue"
-  ).length;
+  // UPCOMING DEADLINES
+  const upcomingDeadlines = tasks
+    .filter((task) => {
+      if (!task.dueDateRaw || task.status === "Completed") {
+        return false;
+      }
 
+      const dueDate = new Date(task.dueDateRaw);
+      const today = new Date();
+
+      dueDate.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+
+      return dueDate >= today;
+    })
+    .sort(
+      (a, b) =>
+        new Date(a.dueDateRaw) - new Date(b.dueDateRaw)
+    );
+
+  // OVERDUE TASKS
+  const overdueTasks = tasks.filter((task) => {
+    if (!task.dueDateRaw || task.status === "Completed") {
+      return false;
+    }
+
+    const dueDate = new Date(task.dueDateRaw);
+    const today = new Date();
+
+    dueDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    return dueDate < today;
+  }).length;
+
+  // SEARCH TASKS
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
       const searchText = search.toLowerCase();
@@ -172,6 +252,7 @@ function EmployeeDashboard() {
     });
   }, [tasks, search]);
 
+  // SCROLL TO SECTION
   const scrollToSection = (sectionId, menuName) => {
     setActiveMenu(menuName);
 
@@ -181,6 +262,7 @@ function EmployeeDashboard() {
     });
   };
 
+  // LOGOUT
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -191,22 +273,82 @@ function EmployeeDashboard() {
     navigate("/", { replace: true });
   };
 
-  const handleTaskStatus = (taskId, newStatus) => {
-    setTasks((previousTasks) =>
-      previousTasks.map((task) =>
-        task.id === taskId
-          ? { ...task, status: newStatus }
-          : task
-      )
-    );
+  // UPDATE TASK STATUS
+  const handleTaskStatus = async (taskId, newStatus) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/tasks/my-tasks/${taskId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: newStatus,
+          }),
+        }
+      );
+
+      const contentType = response.headers.get("content-type");
+
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error(
+          `Server returned an invalid response. Status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to update task status");
+      }
+
+      setTasks((previousTasks) =>
+        previousTasks.map((task) =>
+          task.id === taskId
+            ? { ...task, status: data.task.status }
+            : task
+        )
+      );
+
+      const activityResponse = await fetch(
+  "http://localhost:5000/api/activities/my-activities",
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  }
+);
+
+const activityData = await activityResponse.json();
+
+if (activityResponse.ok && activityData.success) {
+  setActivities(activityData.activities);
+}
+
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Task status updated successfully!",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed!",
+        text: error.message,
+        confirmButtonColor: "#2864ef",
+      });
+    }
   };
 
   return (
     <div className="ed-layout">
-
       {/* SIDEBAR */}
       <aside className="ed-sidebar">
-
         <div className="ed-brand">
           <div className="ed-brand-icon">✦</div>
 
@@ -217,7 +359,6 @@ function EmployeeDashboard() {
         </div>
 
         <nav className="ed-navigation">
-
           <button
             className={activeMenu === "Dashboard" ? "active" : ""}
             onClick={() => scrollToSection("ed-dashboard", "Dashboard")}
@@ -258,11 +399,9 @@ function EmployeeDashboard() {
           >
             <span>♙</span> My Profile
           </button>
-
         </nav>
 
         <div className="ed-sidebar-bottom">
-
           <div className="ed-sidebar-promo">
             <span>◷</span>
             <h4>Better Teams</h4>
@@ -275,20 +414,15 @@ function EmployeeDashboard() {
 
           <div className="ed-sidebar-footer">
             <span>Version 1.0.0</span>
-            <span className="ed-online">
-              ● Online
-            </span>
+            <span className="ed-online">● Online</span>
           </div>
-
         </div>
       </aside>
 
       {/* MAIN CONTENT */}
       <main className="ed-main" id="ed-dashboard">
-
         {/* TOP HEADER */}
         <header className="ed-topbar">
-
           <div className="ed-search">
             <span>⌕</span>
 
@@ -301,7 +435,6 @@ function EmployeeDashboard() {
           </div>
 
           <div className="ed-topbar-right">
-
             <button
               className="ed-notification-button"
               onClick={() => setShowNotifications((prev) => !prev)}
@@ -311,9 +444,7 @@ function EmployeeDashboard() {
             </button>
 
             <div className="ed-user-info">
-              <div className="ed-avatar">
-                {employeeInitials}
-              </div>
+              <div className="ed-avatar">{employeeInitials}</div>
 
               <div>
                 <h4>{employeeName}</h4>
@@ -322,17 +453,13 @@ function EmployeeDashboard() {
 
               <span>⌄</span>
             </div>
-
           </div>
-
         </header>
 
         {/* PAGE CONTENT */}
         <div className="ed-content">
-
           {/* PAGE TITLE */}
           <section className="ed-page-heading">
-
             <div>
               <div className="ed-breadcrumb">
                 Dashboard <span>/</span> Employee
@@ -367,21 +494,21 @@ function EmployeeDashboard() {
                 ▤ View My Tasks
               </button>
             </div>
-
           </section>
 
           {/* SUMMARY CARDS */}
           <section className="ed-summary-grid">
-
             <div className="ed-summary-card">
               <div className="ed-card-top">
                 <span>MY TASKS</span>
                 <span className="ed-card-icon blue">▤</span>
               </div>
 
-              <h2>{tasks.length + 3}</h2>
+              <h2>{tasks.length}</h2>
               <p>Total tasks assigned to me</p>
-              <small className="blue-text">↗ 2 tasks due this week</small>
+              <small className="blue-text">
+                {upcomingDeadlines.length} upcoming deadlines
+              </small>
             </div>
 
             <div className="ed-summary-card">
@@ -392,7 +519,9 @@ function EmployeeDashboard() {
 
               <h2>{inProgressTasks}</h2>
               <p>Tasks currently being worked on</p>
-              <small className="green-text">● Active project activities</small>
+              <small className="green-text">
+                ● Active project activities
+              </small>
             </div>
 
             <div className="ed-summary-card">
@@ -401,9 +530,11 @@ function EmployeeDashboard() {
                 <span className="ed-card-icon green">✓</span>
               </div>
 
-              <h2>{completedTasks + 3}</h2>
+              <h2>{completedTasks}</h2>
               <p>Tasks successfully completed</p>
-              <small className="green-text">↗ 80% completion rate</small>
+              <small className="green-text">
+                Successfully completed tasks
+              </small>
             </div>
 
             <div className="ed-summary-card">
@@ -413,15 +544,13 @@ function EmployeeDashboard() {
               </div>
 
               <h2>{overdueTasks}</h2>
-              <p>Task requiring immediate attention</p>
+              <p>Tasks requiring immediate attention</p>
               <small className="red-text">Attention required</small>
             </div>
-
           </section>
 
           {/* TASK MANAGEMENT */}
           <section className="ed-panel ed-tasks-panel" id="ed-tasks">
-
             <div className="ed-section-heading">
               <h3>My Tasks</h3>
 
@@ -432,7 +561,6 @@ function EmployeeDashboard() {
 
             <div className="ed-table-wrapper">
               <table className="ed-task-table">
-
                 <thead>
                   <tr>
                     <th>TASK NAME</th>
@@ -445,65 +573,77 @@ function EmployeeDashboard() {
                 </thead>
 
                 <tbody>
-                  {filteredTasks.map((task) => (
-
-                    <tr key={task.id}>
-
-                      <td>
-                        <div className="ed-task-name">
-                          <span className="ed-task-dot"></span>
-
-                          <div>
-                            <strong>{task.name}</strong>
-                            <p>{task.description}</p>
-                          </div>
-                        </div>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="6" className="ed-empty">
+                        Loading tasks...
                       </td>
-
-                      <td>{task.project}</td>
-
-                      <td>
-                        <span className={`ed-priority ${task.priority.toLowerCase()}`}>
-                          {task.priority}
-                        </span>
-                      </td>
-
-                      <td>{task.dueDate}</td>
-
-                      <td>
-                        <span className={`ed-status ${task.status.toLowerCase().replace(" ", "-")}`}>
-                          ● {task.status}
-                        </span>
-                      </td>
-
-                      <td>
-                        <select
-                          className="ed-task-action"
-                          value={task.status}
-                          onChange={(e) =>
-                            handleTaskStatus(task.id, e.target.value)
-                          }
-                          aria-label={`Update status for ${task.name}`}
-                        >
-                          <option value="To Do">To Do</option>
-                          <option value="In Progress">In Progress</option>
-                          <option value="Completed">Completed</option>
-                          <option value="Overdue">Overdue</option>
-                        </select>
-                      </td>
-
                     </tr>
+                  ) : error ? (
+                    <tr>
+                      <td colSpan="6" className="ed-empty">
+                        {error}
+                      </td>
+                    </tr>
+                  ) : filteredTasks.length > 0 ? (
+                    filteredTasks.map((task) => (
+                      <tr key={task.id}>
+                        <td>
+                          <div className="ed-task-name">
+                            <span className="ed-task-dot"></span>
 
-                  ))}
+                            <div>
+                              <strong>{task.name}</strong>
+                              <p>{task.description}</p>
+                            </div>
+                          </div>
+                        </td>
 
-                  {filteredTasks.length === 0 && (
+                        <td>{task.project}</td>
+
+                        <td>
+                          <span
+                            className={`ed-priority ${task.priority.toLowerCase()}`}
+                          >
+                            {task.priority}
+                          </span>
+                        </td>
+
+                        <td>{task.dueDate}</td>
+
+                        <td>
+                          <span
+                            className={`ed-status ${task.status
+                              .toLowerCase()
+                              .replace(" ", "-")}`}
+                          >
+                            ● {task.status}
+                          </span>
+                        </td>
+
+                        <td>
+                          <select
+                            className="ed-task-action"
+                            value={task.status}
+                            onChange={(e) =>
+                              handleTaskStatus(task.id, e.target.value)
+                            }
+                            aria-label={`Update status for ${task.name}`}
+                          >
+                            <option value="To Do">To Do</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
                     <tr>
                       <td colSpan="6" className="ed-empty">
                         No tasks found.
                       </td>
                     </tr>
                   )}
-
                 </tbody>
               </table>
             </div>
@@ -511,18 +651,26 @@ function EmployeeDashboard() {
             <div className="ed-table-footer">
               Showing {filteredTasks.length} of {tasks.length} assigned tasks
             </div>
-
           </section>
 
           {/* BOTTOM GRID */}
           <div className="ed-bottom-grid">
-
             {/* PROJECTS */}
-            <section className="ed-panel ed-projects-panel" id="ed-projects">
-
+            <section
+              className="ed-panel ed-projects-panel"
+              id="ed-projects"
+            >
               <div className="ed-section-heading">
                 <h3>
-                  My Projects <span className="ed-count-badge">2 Active</span>
+                  My Projects{" "}
+                  <span className="ed-count-badge">
+                    {
+                      projects.filter(
+                        (project) => project.status === "In Progress"
+                      ).length
+                    }{" "}
+                    Active
+                  </span>
                 </h3>
 
                 <button>View All Projects →</button>
@@ -532,133 +680,160 @@ function EmployeeDashboard() {
                 Projects you are currently contributing to.
               </p>
 
-              {projects.map((project) => (
+              {projectsLoading ? (
+                <p className="ed-empty">Loading projects...</p>
+              ) : projectsError ? (
+                <p className="ed-empty">{projectsError}</p>
+              ) : projects.length > 0 ? (
+                projects.map((project) => (
+                  <div className="ed-project-card" key={project.id}>
+                    <div className="ed-project-title">
+                      <div>
+                        <span className="ed-project-dot"></span>
+                        <strong>{project.name}</strong>
+                        <small>({project.code})</small>
+                      </div>
 
-                <div className="ed-project-card" key={project.id}>
-
-                  <div className="ed-project-title">
-                    <div>
-                      <span className="ed-project-dot"></span>
-                      <strong>{project.name}</strong>
-                      <small>({project.code})</small>
+                      <span className="ed-project-status">
+                        {project.status}
+                      </span>
                     </div>
 
-                    <span className="ed-project-status">
-                      {project.status}
-                    </span>
-                  </div>
-
-                  <div className="ed-project-badges">
-                    <span className="ed-project-priority">
-                      {project.priority}
-                    </span>
-                    <span>{project.tasks}</span>
-                  </div>
-
-                  <div className="ed-project-details">
-                    <div>
-                      <small>Role</small>
-                      <strong>{project.role}</strong>
+                    <div className="ed-project-badges">
+                      <span className="ed-project-priority">
+                        {project.priority}
+                      </span>
+                      <span>{project.tasks}</span>
                     </div>
 
-                    <div>
-                      <small>Project Manager</small>
-                      <strong>{project.manager}</strong>
+                    <div className="ed-project-details">
+                      <div>
+                        <small>Role</small>
+                        <strong>{project.role}</strong>
+                      </div>
+
+                      <div>
+                        <small>Project Manager</small>
+                        <strong>{project.manager}</strong>
+                      </div>
+                    </div>
+
+                    <div className="ed-progress-heading">
+                      <span>Overall Project Progress</span>
+                      <strong>{project.progress}%</strong>
+                    </div>
+
+                    <div className="ed-progress-track">
+                      <div
+                        className="ed-progress-value"
+                        style={{ width: `${project.progress}%` }}
+                      ></div>
+                    </div>
+
+                    <div className="ed-project-footer">
+                      <span>Deadline: {project.deadline}</span>
+                      <button>View Project</button>
                     </div>
                   </div>
-
-                  <div className="ed-progress-heading">
-                    <span>Overall Project Progress</span>
-                    <strong>{project.progress}%</strong>
-                  </div>
-
-                  <div className="ed-progress-track">
-                    <div
-                      className="ed-progress-value"
-                      style={{ width: `${project.progress}%` }}
-                    ></div>
-                  </div>
-
-                  <div className="ed-project-footer">
-                    <span>Deadline: {project.deadline}</span>
-                    <button>View Project</button>
-                  </div>
-
-                </div>
-
-              ))}
-
+                ))
+              ) : (
+                <p className="ed-empty">No projects assigned yet.</p>
+              )}
             </section>
 
             {/* RIGHT COLUMN */}
             <div className="ed-right-column">
-
               {/* UPCOMING DEADLINES */}
               <section className="ed-panel ed-deadlines-panel">
-
                 <div className="ed-section-heading">
                   <h3>◷ Upcoming Deadlines</h3>
-                  <button>View All</button>
+
+                  <button
+                    onClick={() =>
+                      scrollToSection("ed-tasks", "My Tasks")
+                    }
+                  >
+                    View All
+                  </button>
                 </div>
 
-                {deadlines.map((deadline, index) => (
-
-                  <div className="ed-deadline-item" key={index}>
-
-                    <div>
-                      <strong>{deadline.name}</strong>
-                      <p>{deadline.project}</p>
-                    </div>
-
-                    <div className="ed-deadline-meta">
-                      <span className={`ed-priority ${deadline.priority.toLowerCase()}`}>
-                        {deadline.priority}
-                      </span>
-                      <small>{deadline.time}</small>
-                    </div>
-
-                  </div>
-
-                ))}
-
-              </section>
-
-              {/* RECENT ACTIVITY */}
-              <section className="ed-panel ed-activity-panel">
-
-                <div className="ed-section-heading">
-                  <h3>Recent Activity</h3>
-                  <span>Past 3 days</span>
-                </div>
-
-                <div className="ed-activity-list">
-
-                  {activities.map((activity, index) => (
-
-                    <div className="ed-activity-item" key={index}>
-
-                      <span className={`ed-activity-dot ${activity.type}`}></span>
-
+                {loading ? (
+                  <p className="ed-empty">Loading deadlines...</p>
+                ) : upcomingDeadlines.length > 0 ? (
+                  upcomingDeadlines.map((task) => (
+                    <div className="ed-deadline-item" key={task.id}>
                       <div>
-                        <p>{activity.title}</p>
-                        <small>{activity.time}</small>
+                        <strong>{task.name}</strong>
+                        <p>{task.project}</p>
                       </div>
 
+                      <div className="ed-deadline-meta">
+                        <span
+                          className={`ed-priority ${task.priority.toLowerCase()}`}
+                        >
+                          {task.priority}
+                        </span>
+
+                        <small>
+                          {new Date(task.dueDateRaw).toLocaleDateString(
+                            "en-GB"
+                          )}
+                        </small>
+                      </div>
                     </div>
-
-                  ))}
-
-                </div>
-
+                  ))
+                ) : (
+                  <p className="ed-empty">
+                    No upcoming deadlines. You're all caught up!
+                  </p>
+                )}
               </section>
 
-            </div>
+{/* RECENT ACTIVITY */}
+<section className="ed-panel ed-activity-panel">
+  <div className="ed-section-heading">
+    <h3>Recent Activity</h3>
+    <span>Latest updates</span>
+  </div>
 
+  <div className="ed-activity-list">
+    {activitiesLoading ? (
+      <p className="ed-empty">Loading activities...</p>
+    ) : activities.length > 0 ? (
+      activities.map((activity) => (
+        <div className="ed-activity-item" key={activity._id}>
+          <span
+            className={`ed-activity-dot ${activity.type}`}
+          ></span>
+
+          <div>
+            <p>{activity.title}</p>
+
+            <small>
+              {new Date(activity.createdAt).toLocaleString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </small>
           </div>
+        </div>
+      ))
+    ) : (
+      <p className="ed-empty">No recent activities yet.</p>
+    )}
+    </div>
+</section>
 
+</div> {/* closes ed-right-column */}
+</div> {/* closes ed-bottom-grid */}
           {/* PROFILE */}
-          <section className="ed-panel ed-profile-panel" id="ed-profile">
-
+          <section
+            className="ed-panel ed-profile-panel"
+            id="ed-profile"
+          >
             <div className="ed-section-heading">
               <h3>My Profile</h3>
               <span>Employee Information</span>
@@ -675,13 +850,11 @@ function EmployeeDashboard() {
                 <span>Employee</span>
               </div>
             </div>
-
           </section>
 
           <footer className="ed-footer">
             © 2026 TechFlow ERP. All rights reserved.
           </footer>
-
         </div>
 
         {/* NOTIFICATIONS POPUP */}
@@ -700,9 +873,7 @@ function EmployeeDashboard() {
             <p>Task status updated successfully.</p>
           </div>
         )}
-
       </main>
-
     </div>
   );
 }

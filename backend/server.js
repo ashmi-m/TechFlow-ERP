@@ -12,6 +12,7 @@ const employeeRoutes = require('./routes/employeeRoutes');
 const departmentRoutes = require("./routes/departmentRoutes");
 const projectRoutes = require('./routes/projectRoutes');
 const taskRoutes = require('./routes/taskRoutes');
+const activityRoutes = require("./routes/activityRoutes");
 const { protect, authorize } = require('./middleware/authMiddleware');
 
 const app = express();
@@ -46,13 +47,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/departments', departmentRoutes);
 
-app.use(
-  '/api/projects',
-  protect,
-  authorize('admin', 'project_manager'),
-  projectRoutes
-);
+app.use('/api/projects', protect, projectRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/activities', activityRoutes);
 app.get('/api/tasks-debug', (req, res) => {
   res.json({ message: "Server route is working" });
 });

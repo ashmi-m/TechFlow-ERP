@@ -23,6 +23,8 @@ import MyProjects from "./pages/MyProjects";
 import CreateProject from "./pages/CreateProject";
 import CreateTask from "./pages/CreateTask";
 import TaskManagement from "./pages/TaskManagement";
+import EmployeeMyProjects from "./pages/EmployeeMyProjects";
+import EmployeeMyTasks from "./pages/EmployeeMyTasks";
  import EmployeeLogin from "./pages/EmployeeLogin";
 function App() {
   return (
@@ -84,14 +86,21 @@ function App() {
 </Route>
 
         {/* Employee Routes */}
-        <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
-          <Route
-            path="/employee/dashboard"
-            element={<EmployeeDashboard />}
-          />
+       <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
+  <Route
+    path="/employee/dashboard"
+    element={<EmployeeDashboard />}
+  />
 
-        </Route>
-
+  <Route
+    path="/employee/projects"
+    element={<EmployeeMyProjects />}
+  />
+</Route>
+<Route
+  path="/employee/tasks"
+  element={<EmployeeMyTasks />}
+/>
 
         {/* Unknown Routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
