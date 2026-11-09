@@ -130,11 +130,10 @@ export default function AddEmployee() {
     employmentType: "Full-Time",
     joiningDate: "",
     reportingManager: "",
-    username: "",
+   
     password: "",
     confirmPassword: "",
-    sendInvite: true,
-    requirePasswordReset: true,
+    
   });
 
   const [photoPreview, setPhotoPreview] = useState("");
@@ -166,46 +165,68 @@ export default function AddEmployee() {
     setShowPassword(true);
   }
 
-  // Submit employee form
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setError("");
+async function handleSubmit(event) {
+  event.preventDefault();
+  setError("");
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // confirmPassword is only for the UI, so it is not sent to the server
-      // fullName -> name and jobPosition -> designation (backend field names)
-      const { confirmPassword, fullName, jobPosition, ...rest } = formData;
-      const payload = { ...rest, name: fullName, designation: jobPosition };
-
-      const response = await fetch("/api/employees", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(
-          result.message || `Failed to create employee (status ${response.status}).`
-        );
-      }
-
-      alert("Employee created successfully!");
-      navigate("/employees");
-    } catch (err) {
-      setError(err.message || "Unable to connect to the server. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  if (formData.password !== formData.confirmPassword) {
+    setError("Passwords do not match.");
+    return;
   }
+
+  if (formData.password.length < 8) {
+    setError("Password must contain at least 8 characters.");
+    return;
+  }
+
+  // Get Admin JWT token
+  const token =
+    localStorage.getItem("token") ||
+    sessionStorage.getItem("token");
+
+  if (!token) {
+    setError("Admin session expired. Please login again.");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const payload = {
+      employeeId: formData.employeeId.trim(),
+      name: formData.fullName.trim(),
+      email: formData.email.trim().toLowerCase(),
+      phone: formData.phone,
+      department: formData.department,
+      designation: formData.jobPosition,
+      joiningDate: formData.joiningDate,
+      password: formData.password,
+    };
+
+    const response = await fetch("/api/employees", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to create employee.");
+    }
+window.alert("Employee and login account created successfully!");
+
+    navigate("/employees");
+
+  } catch (err) {
+    setError(err.message || "Unable to create employee.");
+  } finally {
+    setLoading(false);
+  }
+}
 
   const shared = { onChange: handleChange };
 
@@ -279,9 +300,15 @@ export default function AddEmployee() {
                 options={["Development", "Engineering", "Human Resources", "Finance", "Marketing", "Sales", "Design", "Operations"]}
                 {...shared} />
               <Field label="Job Position" name="jobPosition" value={formData.jobPosition} required {...shared} />
-              <SelectField label="System Access Role" name="systemRole" value={formData.systemRole} required
-                options={["Employee", "Team Lead", "Manager"]}
-                hint="Standard timesheet and task access." {...shared} />
+      
+      <Field
+  label="System Access Role"
+  name="systemRole"
+  value="Employee"
+  readOnly
+  hint="Employee access is assigned automatically."
+/>
+
               <Field label="Reporting Manager" name="reportingManager" value={formData.reportingManager} {...shared} />
               <Field label="Joining Date" name="joiningDate" type="date" max="9999-12-31" value={formData.joiningDate} required {...shared} />
               <SelectField label="Employment Type" name="employmentType" value={formData.employmentType} required
@@ -293,8 +320,9 @@ export default function AddEmployee() {
           <Section icon="lock" step="03" title="Account Setup & Security"
             subtitle="Login credentials and the invitation email.">
             <div className="add-employee-grid add-employee-grid-3">
-              <Field label="Username" name="username" value={formData.username} required autoComplete="off"
-                hint="Used to sign in." {...shared} />
+<p className="add-employee-security-note">
+  Employees can sign in using their registered email address and temporary password.
+</p>
 
               <Field label="Temporary Password" name="password" value={formData.password} required
                 type={showPassword ? "text" : "password"} autoComplete="new-password" {...shared}>

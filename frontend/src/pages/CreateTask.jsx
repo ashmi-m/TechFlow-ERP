@@ -47,6 +47,12 @@ function CreateTask() {
         const projectData = await projectResponse.json();
         const employeeData = await employeeResponse.json();
 
+        console.log("Project API Status:", projectResponse.status);
+console.log("Project API Data:", projectData);
+
+console.log("Employee API Status:", employeeResponse.status);
+console.log("Employee API Data:", employeeData);
+
         if (!projectResponse.ok) {
           throw new Error(
             projectData.message || "Failed to load projects."

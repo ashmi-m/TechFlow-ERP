@@ -43,6 +43,8 @@ function Login() {
       );
 
       const data = await response.json();
+console.log("LOGIN DATA:", data);
+console.log("Logged-in role:", data.user?.role);
 
       if (!response.ok || !data.success) {
         throw new Error(
