@@ -84,9 +84,8 @@ function App() {
     element={<CreateTask />}
   />
 </Route>
-
-        {/* Employee Routes */}
-       <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
+{/* Employee Routes */}
+<Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
   <Route
     path="/employee/dashboard"
     element={<EmployeeDashboard />}
@@ -96,11 +95,12 @@ function App() {
     path="/employee/projects"
     element={<EmployeeMyProjects />}
   />
+
+  <Route
+    path="/employee/tasks"
+    element={<EmployeeMyTasks />}
+  />
 </Route>
-<Route
-  path="/employee/tasks"
-  element={<EmployeeMyTasks />}
-/>
 
         {/* Unknown Routes */}
         <Route path="*" element={<Navigate to="/" replace />} />

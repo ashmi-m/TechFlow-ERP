@@ -20,79 +20,68 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Login using the backend API
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    setError("");
-    setLoading(true);
+  setError("");
+  setLoading(true);
 
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: email.trim(),
-            password,
-          }),
-        }
-      );
-
-      const data = await response.json();
-console.log("LOGIN DATA:", data);
-console.log("Logged-in role:", data.user?.role);
-
-      if (!response.ok || !data.success) {
-        throw new Error(
-          data.message || "Invalid email or password."
-        );
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/auth/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
       }
+    );
 
-      // Validate user role before storing login information
-      const role = data.user?.role;
+    const data = await response.json();
 
-     const roleRoutes = {
-  admin: "/dashboard",
-  project_manager: "/project-manager/dashboard",
-  employee: "/employee/dashboard",
-};
-
-      if (!roleRoutes[role]) {
-        throw new Error(
-          "Invalid user role. Please contact the administrator."
-        );
-      }
-
-      // Save login information
-      const storage = rememberMe ? localStorage : sessionStorage;
-      const otherStorage = rememberMe ? sessionStorage : localStorage;
-
-      storage.setItem("token", data.token);
-      storage.setItem("user", JSON.stringify(data.user));
-
-      // Remove old login information from the other storage
-      otherStorage.removeItem("token");
-      otherStorage.removeItem("user");
-
-      // Redirect users based on their role
-      navigate(roleRoutes[role], { replace: true });
-
-    } catch (err) {
-      console.error("Login error:", err);
-
-      setError(
-        err.message === "Failed to fetch"
-          ? "Cannot connect to the server. Please make sure the backend is running."
-          : err.message
-      );
-    } finally {
-      setLoading(false);
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "Invalid email or password.");
     }
-  };
+
+    // Validate authentication response
+    if (!data.user || !data.token) {
+      throw new Error("Authentication information not received.");
+    }
+
+    // Admin portal accepts ONLY admin accounts
+    if (data.user.role !== "admin") {
+      throw new Error(
+        "Access denied. This account is not an Admin account. Please use your correct login portal."
+      );
+    }
+
+    // Store admin authentication
+    const storage = rememberMe ? localStorage : sessionStorage;
+    const otherStorage = rememberMe ? sessionStorage : localStorage;
+
+    otherStorage.removeItem("token");
+    otherStorage.removeItem("user");
+
+    storage.setItem("token", data.token);
+    storage.setItem("user", JSON.stringify(data.user));
+
+    // Navigate only to Admin Dashboard
+    navigate("/dashboard", { replace: true });
+
+  } catch (err) {
+    setError(
+      err.message === "Failed to fetch"
+        ? "Cannot connect to the server. Please make sure the backend is running."
+        : err.message
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleForgotPassword = () => {
     alert("Forgot password functionality will be implemented later.");

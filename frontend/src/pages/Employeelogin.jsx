@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./EmployeeLogin.css";
 
 const API_URL = "http://localhost:5000/api/auth/login";
-const EMPLOYEE_HOME = "/employee/dashboard";
+
 
 function EmployeeLogin() {
   const navigate = useNavigate();
@@ -51,63 +51,83 @@ function EmployeeLogin() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    setError("");
-    setMessage("");
+  setError("");
+  setMessage("");
 
-    if (!formData.email.trim() || !formData.password) {
-      setError("Please enter your email address and password.");
-      return;
-    }
+  const email = formData.email.trim().toLowerCase();
 
-    try {
-      setLoading(true);
+  if (!email || !formData.password) {
+    setError("Please enter your email address and password.");
+    return;
+  }
 
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email.trim(),
-          password: formData.password,
-        }),
-      });
+  try {
+    setLoading(true);
 
-      const result = await response.json().catch(() => ({}));
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password: formData.password,
+      }),
+    });
 
-      if (!response.ok) {
-        throw new Error(
-          result.message || "Invalid email address or password."
-        );
-      }
+    const result = await response.json();
 
-      if (result.token) {
-        localStorage.setItem("token", result.token);
-      }
-
-      // Remember email only, never password.
-      if (rememberMe) {
-        localStorage.setItem(
-          "employeeEmail",
-          formData.email.trim()
-        );
-      } else {
-        localStorage.removeItem("employeeEmail");
-      }
-
-      navigate(EMPLOYEE_HOME);
-
-    } catch (err) {
-      setError(
-        err.message ||
-        "Unable to connect to the server. Please try again."
+    if (!response.ok) {
+      throw new Error(
+        result.message || "Invalid email address or password."
       );
-    } finally {
-      setLoading(false);
     }
-  };
+
+    if (!result.user || !result.token) {
+      throw new Error("Authentication information not received.");
+    }
+
+    // Redirect users to their correct login portal
+    // Allow only employee accounts
+if (result.user.role !== "employee") {
+  throw new Error(
+    "Access denied. This account is not an Employee account. Please use your correct login portal."
+  );
+}
+    
+
+
+    // Store employee authentication
+    const storage = rememberMe ? localStorage : sessionStorage;
+    const otherStorage = rememberMe ? sessionStorage : localStorage;
+
+    otherStorage.removeItem("token");
+    otherStorage.removeItem("user");
+
+    storage.setItem("token", result.token);
+    storage.setItem("user", JSON.stringify(result.user));
+   
+
+
+    // Remember email only, never password
+    if (rememberMe) {
+      localStorage.setItem("employeeEmail", email);
+    } else {
+      localStorage.removeItem("employeeEmail");
+    }
+
+    navigate("/employee/dashboard", { replace: true });
+
+  } catch (err) {
+    setError(
+      err.message || "Unable to connect to the server. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleForgotPassword = () => {
     setMessage(
