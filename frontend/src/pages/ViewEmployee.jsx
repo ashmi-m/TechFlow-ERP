@@ -98,7 +98,23 @@ export default function ViewEmployee() {
             setLoading(true);
             setError("");
             try {
-                const response = await fetch(`/api/employees/${id}`);
+const token =
+    localStorage.getItem("token") ||
+    sessionStorage.getItem("token");
+
+if (!token) {
+    throw new Error("Authentication token not found. Please login again.");
+}
+
+const response = await fetch(
+    `http://localhost:5000/api/employees/${id}`,
+    {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    }
+);
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(result.message || `Failed to load employee (status ${response.status}).`);
                 // supports { ...employee } or { data: employee } or { employee }
@@ -117,11 +133,25 @@ export default function ViewEmployee() {
     async function handleDeactivate() {
         if (!window.confirm("Deactivate this employee?")) return;
         try {
-            const response = await fetch(`/api/employees/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status: "Inactive" }),
-            });
+           const token =
+    localStorage.getItem("token") ||
+    sessionStorage.getItem("token");
+
+if (!token) {
+    throw new Error("Authentication token not found. Please login again.");
+}
+
+const response = await fetch(
+    `http://localhost:5000/api/employees/${id}`,
+    {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: "Inactive" }),
+    }
+);
             const result = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(result.message || "Failed to deactivate employee.");
             setEmployee((previous) => ({ ...previous, status: "Inactive" }));

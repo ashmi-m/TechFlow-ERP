@@ -31,43 +31,53 @@ const [editForm, setEditForm] = useState({
 
   const pageSize = 5;
 
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        setLoading(true);
-        setError("");
+useEffect(() => {
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-        const response = await fetch(API_URL);
-        const data = await response.json();
+      // Get JWT token from storage
+      const token =
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token");
 
-        if (!response.ok) {
-          throw new Error(data.message || "Unable to load employees.");
-        }
-
-        // Supports both { success: true, employees: [] }
-        // and a direct array response.
-        const employeeList = Array.isArray(data)
-          ? data
-          : data.employees;
-
-        if (!Array.isArray(employeeList)) {
-          throw new Error("Invalid employee data received from server.");
-        }
-
-        setEmployees(employeeList);
-      } catch (err) {
-        setError(
-          err.message ||
-            "Unable to connect to the server. Please try again."
-        );
-      } finally {
-        setLoading(false);
+      if (!token) {
+        throw new Error("Authentication token not found. Please login again.");
       }
-    };
 
-    fetchEmployees();
-  }, []);
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to load employees.");
+      }
+
+      const employeeList = Array.isArray(data)
+        ? data
+        : data.employees;
+
+      if (!Array.isArray(employeeList)) {
+        throw new Error("Invalid employee data received from server.");
+      }
+
+      setEmployees(employeeList);
+
+    } catch (err) {
+      setError(err.message || "Unable to load employees.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchEmployees();
+}, []);
   const normalizeStatus = (status) => {
     const value = String(status || "").trim().toLowerCase();
 
@@ -252,12 +262,21 @@ const handleUpdateEmployee = async (event) => {
   event.preventDefault();
 
   try {
+    const token =
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token");
+
+    if (!token) {
+      throw new Error("Authentication token not found. Please login again.");
+    }
+
     const response = await fetch(
       `${API_URL}/${editingEmployee._id}`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(editForm),
       }
@@ -277,17 +296,23 @@ const handleUpdateEmployee = async (event) => {
       )
     );
 
-   closeEditModal();
+    closeEditModal();
 
-Swal.fire({
-  icon: "success",
-  title: "Updated Successfully!",
-  text: "Employee details have been updated.",
-  confirmButtonText: "Done",
-  confirmButtonColor: "#2864ef",
-});
+    Swal.fire({
+      icon: "success",
+      title: "Updated Successfully!",
+      text: "Employee details have been updated.",
+      confirmButtonText: "Done",
+      confirmButtonColor: "#2864ef",
+    });
+
   } catch (error) {
-    alert(error.message || "Unable to update employee.");
+    Swal.fire({
+      icon: "error",
+      title: "Update Failed!",
+      text: error.message || "Unable to update employee.",
+      confirmButtonColor: "#2864ef",
+    });
   }
 };
 
