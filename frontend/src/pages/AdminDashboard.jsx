@@ -145,27 +145,42 @@ export default function AdminDashboard() {
     const [employees, setEmployees] = useState([]);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
   const [employeeError, setEmployeeError] = useState("");
+useEffect(() => {
+  const fetchEmployees = async () => {
+    try {
+      const token =
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token");
 
-   useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/employees");
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          throw new Error(data.message || "Failed to fetch employees");
-        }
-
-        setEmployees(data.employees);
-      } catch (error) {
-        setEmployeeError(error.message);
-      } finally {
-        setLoadingEmployees(false);
+      if (!token) {
+        throw new Error("Authentication token not found.");
       }
-    };
 
-    fetchEmployees();
-  }, []);
+      const response = await fetch(
+        "http://localhost:5000/api/employees",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to fetch employees");
+      }
+
+      setEmployees(data.employees);
+    } catch (error) {
+      setEmployeeError(error.message);
+    } finally {
+      setLoadingEmployees(false);
+    }
+  };
+
+  fetchEmployees();
+}, []);
 
   const totalEmployees = employees.length;
 
@@ -461,10 +476,15 @@ function goToSection(label) {
               </p>
             </div>
 
-            <div className="date-chip">
-              <span>▦</span>
-              Tuesday, 27 Oct 2026
-            </div>
+           <div className="date-chip">
+  <span>▦</span>
+  {new Date().toLocaleDateString("en-IN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })}
+</div>
           </section>
 
           {/* STATISTICS */}
@@ -914,19 +934,19 @@ function goToSection(label) {
                 <div className="employee-status active-status">
                   <span>✓</span>
                   <small>Active</small>
-                  <strong>45</strong>
+                 <strong>{activeEmployees}</strong>
                 </div>
 
                 <div className="employee-status leave-status">
                   <span>◷</span>
                   <small>On Leave</small>
-                  <strong>2</strong>
+               <strong>{onLeaveEmployees}</strong>
                 </div>
 
                 <div className="employee-status inactive-status">
                   <span>×</span>
                   <small>Inactive</small>
-                  <strong>1</strong>
+                <strong>{inactiveEmployees}</strong>
                 </div>
 
               </div>

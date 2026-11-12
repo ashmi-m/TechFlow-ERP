@@ -1,12 +1,8 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AddEmployee.css";
+import Swal from "sweetalert2";
 
-/* ---------- Small helpers (kept OUTSIDE the page component) ----------
-   Your old Field/SelectField were declared inside AddEmployee. React treats a
-   component defined inside another as a brand-new component on every render,
-   so the input was re-mounted on each keystroke and lost focus after 1 letter.
-   Moving them outside fixes that bug. */
 
 const ICONS = {
   user: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
@@ -127,9 +123,10 @@ export default function AddEmployee() {
     department: "",
     jobPosition: "",
     systemRole: "Employee",
-    employmentType: "Full-Time",
-    joiningDate: "",
-    reportingManager: "",
+  employmentType: "Full-Time",
+joiningDate: "",
+reportingManager: "",
+skills: [],
    
     password: "",
     confirmPassword: "",
@@ -193,15 +190,18 @@ async function handleSubmit(event) {
 
   try {
     const payload = {
-      employeeId: formData.employeeId.trim(),
-      name: formData.fullName.trim(),
-      email: formData.email.trim().toLowerCase(),
-      phone: formData.phone,
-      department: formData.department,
-      designation: formData.jobPosition,
-      joiningDate: formData.joiningDate,
-      password: formData.password,
-    };
+  employeeId: formData.employeeId.trim(),
+  name: formData.fullName.trim(),
+  email: formData.email.trim().toLowerCase(),
+  phone: formData.phone,
+  department: formData.department,
+  designation: formData.jobPosition,
+  reportingManager: formData.reportingManager.trim(),
+  employmentType: formData.employmentType,
+  skills: formData.skills,
+  joiningDate: formData.joiningDate,
+  password: formData.password,
+};
 
     const response = await fetch("/api/employees", {
       method: "POST",
@@ -217,7 +217,12 @@ async function handleSubmit(event) {
     if (!response.ok) {
       throw new Error(result.message || "Failed to create employee.");
     }
-window.alert("Employee and login account created successfully!");
+await Swal.fire({
+  icon: "success",
+  title: "Employee Created!",
+  text: "Employee and login account created successfully.",
+  confirmButtonColor: "#2864ef",
+});
 
     navigate("/employees");
 
@@ -296,6 +301,47 @@ window.alert("Employee and login account created successfully!");
             </div>
 
             <div className="add-employee-grid add-employee-grid-3">
+              <div className="add-employee-skills">
+  <label className="add-employee-label">Skills</label>
+
+  <select
+    className="add-employee-select"
+    multiple
+    value={formData.skills}
+    onChange={(e) => {
+      const selectedSkills = Array.from(
+        e.target.selectedOptions,
+        (option) => option.value
+      );
+
+      setFormData((previous) => ({
+        ...previous,
+        skills: selectedSkills,
+      }));
+    }}
+  >
+    {[
+      "JavaScript",
+      "React",
+      "Node.js",
+      "Express.js",
+      "MongoDB",
+      "HTML",
+      "CSS",
+      "Git",
+      "REST API",
+      "TypeScript",
+    ].map((skill) => (
+      <option key={skill} value={skill}>
+        {skill}
+      </option>
+    ))}
+  </select>
+
+  <small className="add-employee-hint">
+    Hold Ctrl (Windows) to select multiple skills.
+  </small>
+</div>
               <SelectField label="Department" name="department" value={formData.department} required
                 options={["Development", "Engineering", "Human Resources", "Finance", "Marketing", "Sales", "Design", "Operations"]}
                 {...shared} />

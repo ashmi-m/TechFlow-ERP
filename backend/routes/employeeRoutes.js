@@ -213,16 +213,19 @@ router.post("/", authorize("admin"), async (req, res) => {
   let createdUser = null;
 
   try {
-    const {
-      employeeId,
-      name,
-      email,
-      phone,
-      department,
-      designation,
-      joiningDate,
-      password,
-    } = req.body;
+  const {
+  employeeId,
+  name,
+  email,
+  phone,
+  department,
+  designation,
+  reportingManager,
+  employmentType,
+    skills,
+  joiningDate,
+  password,
+} = req.body;
 
     if (
       !employeeId ||
@@ -285,18 +288,24 @@ router.post("/", authorize("admin"), async (req, res) => {
       role: "employee",
     });
 
-    // Create Employee profile
     const employee = await Employee.create({
-      employeeId: employeeId.trim(),
-      name: name.trim(),
-      email: normalizedEmail,
-      phone,
-      department,
-      designation,
-      joiningDate: joiningDate || undefined,
-      role: "Employee",
-      status: "Active",
-    });
+  employeeId: employeeId.trim(),
+  name: name.trim(),
+  email: normalizedEmail,
+  phone,
+  department,
+  designation,
+  reportingManager: reportingManager || "",
+  employmentType: employmentType || "Full-Time",
+  skills: Array.isArray(skills)
+    ? skills
+    : skills
+      ? skills.split(",").map((skill) => skill.trim()).filter(Boolean)
+      : [],
+  joiningDate: joiningDate || undefined,
+  role: "Employee",
+  status: "Active",
+});
 
     return res.status(201).json({
       success: true,

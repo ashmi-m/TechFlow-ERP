@@ -40,6 +40,22 @@ const employeeSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    skills: {
+  type: [String],
+  default: [],
+},
+
+    reportingManager: {
+  type: String,
+  trim: true,
+  default: "",
+},
+
+employmentType: {
+  type: String,
+  enum: ["Full-Time", "Part-Time", "Contract", "Intern"],
+  default: "Full-Time",
+},
 
     role: {
       type: String,

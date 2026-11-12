@@ -88,7 +88,7 @@ const department = await Department.findByIdAndUpdate(
   {
     name: name.trim(),
     head: head.trim(),
-    employees: Number(eokmployees),
+  employees: Number(employees),
     status,
   },
   { new: true, runValidators: true }
