@@ -315,9 +315,7 @@ const handleUpdateEmployee = async (event) => {
     });
   }
 };
-
- const handleDeleteEmployee = async (employee) => {
-  // Show confirmation popup
+const handleDeleteEmployee = async (employee) => {
   const result = await Swal.fire({
     title: "Are you sure?",
     text: `Do you want to delete ${employee.name}?`,
@@ -329,14 +327,22 @@ const handleUpdateEmployee = async (event) => {
     cancelButtonText: "Cancel",
   });
 
-  // Stop if the user clicks Cancel
-  if (!result.isConfirmed) {
-    return;
-  }
+  if (!result.isConfirmed) return;
 
   try {
+    const token =
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token");
+
+    if (!token) {
+      throw new Error("Authentication token not found. Please login again.");
+    }
+
     const response = await fetch(`${API_URL}/${employee._id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     const data = await response.json();
@@ -345,12 +351,10 @@ const handleUpdateEmployee = async (event) => {
       throw new Error(data.message || "Failed to delete employee.");
     }
 
-    // Remove deleted employee from the table
     setEmployees((previous) =>
       previous.filter((item) => item._id !== employee._id)
     );
 
-    // Show success popup
     Swal.fire({
       icon: "success",
       title: "Deleted Successfully!",

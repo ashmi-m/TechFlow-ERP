@@ -135,6 +135,9 @@ useEffect(() => {
 
       const projectData = await projectResponse.json();
       const employeeData = await employeeResponse.json();
+  
+      console.log("PROJECT API RESPONSE:", projectData);
+console.log("EMPLOYEE API RESPONSE:", employeeData);
 
       if (!projectResponse.ok) {
         throw new Error(projectData.message || "Failed to load projects.");
