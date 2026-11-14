@@ -26,6 +26,7 @@ import TaskManagement from "./pages/TaskManagement";
 import EmployeeMyProjects from "./pages/EmployeeMyProjects";
 import EmployeeMyTasks from "./pages/EmployeeMyTasks";
  import EmployeeLogin from "./pages/EmployeeLogin";
+ import TeamMembers from "./pages/TeamMembers";
 function App() {
   return (
     <BrowserRouter>
@@ -101,6 +102,10 @@ function App() {
     element={<EmployeeMyTasks />}
   />
 </Route>
+<Route
+  path="/project-manager/team"
+  element={<TeamMembers />}
+/>
 
         {/* Unknown Routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
