@@ -7,10 +7,22 @@ const API_URL = "http://localhost:5000/api/projects";
 function ProjectManagerDashboard() {
   const navigate = useNavigate();
 
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+const [projects, setProjects] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
 
+const [teamMembers, setTeamMembers] = useState([]);
+const [taskStats, setTaskStats] = useState({
+  total: 0,
+  todo: 0,
+  inProgress: 0,
+  completed: 0,
+  overdue: 0,
+});
+
+const [dashboardLoading, setDashboardLoading] = useState(true);
+const [dashboardError, setDashboardError] = useState("");
+const [allTasks, setAllTasks] = useState([]);
   // Fetch projects from MongoDB
   useEffect(() => {
     const fetchProjects = async () => {
@@ -48,6 +60,110 @@ function ProjectManagerDashboard() {
 
     fetchProjects();
   }, []);
+
+
+// Fetch Team Performance and Task Statistics from MongoDB
+useEffect(() => {
+  const fetchDashboardData = async () => {
+    try {
+      const token =
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("Please log in again.");
+      }
+
+      const response = await fetch(
+        "http://localhost:5000/api/tasks/dashboard/team-performance",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to fetch dashboard data."
+        );
+      }
+
+      setTeamMembers(
+        (data.teamPerformance || []).map((member) => ({
+          ...member,
+          initials: member.name
+            ? member.name
+                .split(" ")
+                .filter(Boolean)
+                .map((part) => part[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2)
+            : "NA",
+          role: member.designation || "Employee",
+        }))
+      );
+
+      setTaskStats(
+        data.taskStats || {
+          total: 0,
+          todo: 0,
+          inProgress: 0,
+          completed: 0,
+          overdue: 0,
+        }
+      );
+    } catch (err) {
+      console.error("Dashboard API Error:", err);
+      setDashboardError(err.message);
+    } finally {
+      setDashboardLoading(false);
+    }
+  };
+
+  fetchDashboardData();
+}, []);
+// Fetch all tasks from MongoDB
+useEffect(() => {
+  const fetchAllTasks = async () => {
+    try {
+      const token =
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("Please log in again.");
+      }
+
+      const response = await fetch(
+        "http://localhost:5000/api/tasks",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch tasks.");
+      }
+
+      setAllTasks(data.tasks || []);
+    } catch (err) {
+      console.error("Task Fetch Error:", err);
+    }
+  };
+
+  fetchAllTasks();
+}, []);
+
 
   // Logout functionality
   const handleLogout = () => {
@@ -144,7 +260,20 @@ function ProjectManagerDashboard() {
             year: "numeric",
           })
         : "Not assigned",
-      tasks: "0/0",
+     tasks: (() => {
+  const projectTasks = allTasks.filter((task) => {
+    const taskProjectId =
+      task.project?._id || task.project;
+
+    return String(taskProjectId) === String(project._id);
+  });
+
+  const completedTasks = projectTasks.filter(
+    (task) => task.status === "Completed"
+  ).length;
+
+  return `${completedTasks}/${projectTasks.length}`;
+})(),
       team,
     };
   });
@@ -161,83 +290,44 @@ function ProjectManagerDashboard() {
       ? Math.round((activeProjects / totalProjects) * 100)
       : 0;
 
-  // Sample team data - connect to MongoDB later
-  const teamMembers = [
-    {
-      initials: "AM",
-      name: "Alex Morgan",
-      role: "UI/UX Designer",
-      assigned: 8,
-      completed: 6,
-      pending: 2,
-      progress: 75,
-    },
-    {
-      initials: "JD",
-      name: "John Davis",
-      role: "Frontend Developer",
-      assigned: 6,
-      completed: 4,
-      pending: 2,
-      progress: 67,
-    },
-    {
-      initials: "SK",
-      name: "Sarah Kim",
-      role: "Backend Developer",
-      assigned: 7,
-      completed: 5,
-      pending: 2,
-      progress: 71,
-    },
-    {
-      initials: "RK",
-      name: "Ryan Kelly",
-      role: "QA Engineer",
-      assigned: 5,
-      completed: 4,
-      pending: 1,
-      progress: 80,
-    },
-  ];
+// Generate next 3 upcoming deadlines from actual projects
+const today = new Date();
+today.setHours(0, 0, 0, 0);
 
-  // Temporary task statistics
-  const taskStats = {
-    total: 24,
-    todo: 6,
-    inProgress: 8,
-    completed: 6,
-    overdue: 4,
-  };
+const deadlines = [...projects]
+  .filter((project) => {
+    if (!project.deadline) return false;
 
-  // Generate deadlines from actual projects
-  const deadlines = [...projects]
-    .filter((project) => project.deadline)
-    .sort(
-      (a, b) =>
-        new Date(a.deadline) - new Date(b.deadline)
-    )
-    .slice(0, 3)
-    .map((project, index) => ({
-      icon: ["▣", "▤", "▧"][index],
-      name: project.projectName,
-      date: new Date(project.deadline).toLocaleDateString(
-        "en-GB",
-        {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }
-      ),
-      task: project.projectCode,
-      status: project.status,
-      color:
-        project.priority === "High"
-          ? "blue"
-          : project.priority === "Medium"
-          ? "orange"
-          : "purple",
-    }));
+    const deadlineDate = new Date(project.deadline);
+    deadlineDate.setHours(0, 0, 0, 0);
+
+    return deadlineDate >= today;
+  })
+  .sort(
+    (a, b) =>
+      new Date(a.deadline) - new Date(b.deadline)
+  )
+  .slice(0, 3)
+  .map((project, index) => ({
+    icon: ["▣", "▤", "▧"][index],
+    name: project.projectName,
+    date: new Date(project.deadline).toLocaleDateString(
+      "en-GB",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }
+    ),
+    task: project.projectCode,
+    status: project.status,
+    color:
+      project.priority === "High"
+        ? "blue"
+        : project.priority === "Medium"
+        ? "orange"
+        : "purple",
+  }));
 
   return (
     <div className="pm-dashboard">
@@ -658,7 +748,36 @@ function ProjectManagerDashboard() {
 
               <div className="pm-chart-container">
 
-                <div className="pm-donut">
+            <div
+  className="pm-donut"
+  style={{
+    background: `conic-gradient(
+      #8183ef 0% ${
+        taskStats.total > 0
+          ? (taskStats.todo / taskStats.total) * 100
+          : 0
+      }%,
+      #3478f6 ${
+        taskStats.total > 0
+          ? (taskStats.todo / taskStats.total) * 100
+          : 0
+      }% ${
+        taskStats.total > 0
+          ? ((taskStats.todo + taskStats.inProgress) /
+              taskStats.total) *
+            100
+          : 0
+      }%,
+      #20bd8a ${
+        taskStats.total > 0
+          ? ((taskStats.todo + taskStats.inProgress) /
+              taskStats.total) *
+            100
+          : 0
+      }% 100%
+    )`,
+  }}
+>
                   <div className="pm-donut-center">
                     <strong>{taskStats.total}</strong>
                     <span>TOTAL TASKS</span>
@@ -673,28 +792,44 @@ function ProjectManagerDashboard() {
                   <span className="legend-dot todo"></span>
                   <span>To Do</span>
                   <strong>{taskStats.todo} Tasks</strong>
-                  <small>25%</small>
+                 <small>
+  {taskStats.total > 0
+    ? Math.round((taskStats.todo / taskStats.total) * 100)
+    : 0}%
+</small>
                 </div>
 
                 <div>
                   <span className="legend-dot progress"></span>
                   <span>In Progress</span>
                   <strong>{taskStats.inProgress} Tasks</strong>
-                  <small>33%</small>
+                  <small>
+  {taskStats.total > 0
+    ? Math.round((taskStats.inProgress / taskStats.total) * 100)
+    : 0}%
+</small>
                 </div>
 
                 <div>
                   <span className="legend-dot completed"></span>
                   <span>Completed</span>
                   <strong>{taskStats.completed} Tasks</strong>
-                  <small>25%</small>
+                  <small>
+  {taskStats.total > 0
+    ? Math.round((taskStats.completed / taskStats.total) * 100)
+    : 0}%
+</small>
                 </div>
 
                 <div>
                   <span className="legend-dot overdue"></span>
                   <span>Overdue</span>
                   <strong>{taskStats.overdue} Tasks</strong>
-                  <small>17%</small>
+                 <small>
+  {taskStats.total > 0
+    ? Math.round((taskStats.overdue / taskStats.total) * 100)
+    : 0}%
+</small>
                 </div>
 
               </div>

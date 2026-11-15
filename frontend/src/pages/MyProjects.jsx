@@ -175,10 +175,12 @@ function MyProjects() {
             <small>{totalProjects}</small>
           </button>
 
-          <button>
-            <span>♙</span>
-            Team Members
-          </button>
+      <button
+  onClick={() => navigate("/project-manager/team")}
+>
+  <span>♙</span>
+  Team Members
+</button>
 
           <button>
             <span>▣</span>

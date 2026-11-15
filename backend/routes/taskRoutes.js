@@ -1,7 +1,9 @@
 
 const express = require("express");
 const router = express.Router();
+console.log("TASK ROUTES FILE LOADED");
 const Task = require("../models/Task");
+const Project = require("../models/Project");
 const User = require("../models/User");
 const Employee = require("../models/Employee");
 const Activity = require("../models/Activity");
@@ -33,7 +35,123 @@ router.get(
 );
 
 // CREATE a task
-// GET tasks assigned to logged-in employee
+
+// GET Project Manager Dashboard Team Performance
+router.get("/dashboard/test", (req, res) => {
+  res.json({
+    success: true,
+    message: "Dashboard route is working"
+  });
+});
+
+router.get(
+  "/dashboard/team-performance",
+  protect,
+  authorize("project_manager"),
+  async (req, res) => {
+    try {
+      // 1. Find projects belonging to logged-in Project Manager
+      const projects = await Project.find({
+        projectManager: req.user.userId,
+      }).select("_id teamMembers");
+
+      const projectIds = projects.map((project) => project._id);
+
+      // 2. Collect team members from those projects
+      const employeeIds = [
+        ...new Set(
+          projects.flatMap((project) =>
+            project.teamMembers.map((member) => member.toString())
+          )
+        ),
+      ];
+
+      // 3. Get employee details
+      const employees = await Employee.find({
+        _id: { $in: employeeIds },
+      });
+
+      // 4. Get tasks belonging to those projects
+      const tasks = await Task.find({
+        project: { $in: projectIds },
+      });
+
+      // 5. Calculate individual employee performance
+      const teamPerformance = employees.map((employee) => {
+        const employeeTasks = tasks.filter(
+          (task) =>
+            task.assignedTo.toString() === employee._id.toString()
+        );
+
+        const assigned = employeeTasks.length;
+
+        const completed = employeeTasks.filter(
+          (task) => task.status === "Completed"
+        ).length;
+
+        const pending = assigned - completed;
+
+        const progress =
+          assigned > 0
+            ? Math.round((completed / assigned) * 100)
+            : 0;
+
+        return {
+          _id: employee._id,
+          name: employee.name,
+          email: employee.email,
+          designation: employee.designation,
+          employeeId: employee.employeeId,
+          assigned,
+          completed,
+          pending,
+          progress,
+        };
+      });
+
+      // 6. Calculate overall task statistics
+      const total = tasks.length;
+
+      const todo = tasks.filter(
+        (task) => task.status === "To Do"
+      ).length;
+
+      const inProgress = tasks.filter(
+        (task) => task.status === "In Progress"
+      ).length;
+
+      const completed = tasks.filter(
+        (task) => task.status === "Completed"
+      ).length;
+
+      const overdue = tasks.filter(
+        (task) =>
+          task.status !== "Completed" &&
+          new Date(task.dueDate) < new Date()
+      ).length;
+
+      res.status(200).json({
+        success: true,
+        teamPerformance,
+        taskStats: {
+          total,
+          todo,
+          inProgress,
+          completed,
+          overdue,
+        },
+      });
+    } catch (error) {
+      console.error("Dashboard Team Performance Error:", error);
+
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+);
+
 router.get(
   "/my-tasks",
   protect,
