@@ -57,6 +57,12 @@ function App() {
 
         {/* Project Manager Routes */}
 <Route element={<ProtectedRoute allowedRoles={["project_manager"]} />}>
+
+<Route
+  path="/project-manager/team"
+  element={<TeamMembers />}
+/>
+
   <Route
     path="/project-manager/dashboard"
     element={<ProjectManagerDashboard />}
@@ -102,10 +108,6 @@ function App() {
     element={<EmployeeMyTasks />}
   />
 </Route>
-<Route
-  path="/project-manager/team"
-  element={<TeamMembers />}
-/>
 
         {/* Unknown Routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
