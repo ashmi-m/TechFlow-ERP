@@ -225,6 +225,9 @@ const inactiveEmployees = employees.filter(
     });
   }, [search]);
 
+  console.log("Search value:", search);
+console.log("Filtered projects:", filteredProjects);
+
   const totalPages = Math.max(
     1,
     Math.ceil(filteredProjects.length / pageSize)

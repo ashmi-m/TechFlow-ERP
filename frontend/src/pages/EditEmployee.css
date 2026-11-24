@@ -1,0 +1,159 @@
+
+
+/* ================================
+   EDIT EMPLOYEE — PREMIUM THEME
+================================ */
+
+.edit-employee-page {
+  min-height: 100vh;
+  padding: 40px 24px;
+  background: #F6F4ED;
+  color: #192923;
+  font-family: inherit;
+}
+
+.edit-employee-container {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 36px;
+  background: #FFFCF6;
+  border: 1px solid #E9E5D9;
+  border-radius: 20px;
+  box-shadow: 0 12px 35px rgba(25, 41, 35, 0.06);
+}
+
+.edit-back-button {
+  margin-bottom: 25px;
+  padding: 9px 15px;
+  border: 1px solid #E9E5D9;
+  border-radius: 9px;
+  background: #F0F2E9;
+  color: #075B48;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.edit-back-button:hover {
+  background: #E6EBDD;
+}
+
+.edit-employee-container h1 {
+  margin: 0 0 8px;
+  color: #192923;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.edit-employee-container > p {
+  margin-bottom: 30px;
+  color: #78867D;
+  font-size: 14px;
+}
+
+.edit-employee-container form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  color: #536B60;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.edit-field input,
+.edit-field select {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 46px;
+  padding: 0 13px;
+  border: 1px solid #E9E5D9;
+  border-radius: 10px;
+  outline: none;
+  background: #FFFFFF;
+  color: #192923;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.edit-field input:focus,
+.edit-field select:focus {
+  border-color: #08785B;
+  box-shadow: 0 0 0 3px rgba(8, 120, 91, 0.10);
+}
+
+.edit-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 22px;
+  border-top: 1px solid #E9E5D9;
+}
+
+.edit-actions button {
+  min-height: 44px;
+  padding: 0 22px;
+  border: 1px solid #E9E5D9;
+  border-radius: 10px;
+  background: #F0F2E9;
+  color: #075B48;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.edit-actions button:last-child {
+  border-color: #08785B;
+  background: #08785B;
+  color: #FFFFFF;
+}
+
+.edit-actions button:last-child:hover {
+  background: #075B48;
+}
+
+.edit-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.edit-error {
+  margin-bottom: 20px;
+  padding: 13px 15px;
+  border: 1px solid #F0D0CC;
+  border-radius: 9px;
+  background: #FFF0EE;
+  color: #B7433D;
+  font-size: 14px;
+}
+
+@media (max-width: 650px) {
+  .edit-employee-page {
+    padding: 20px 12px;
+  }
+
+  .edit-employee-container {
+    padding: 23px 17px;
+  }
+
+  .edit-employee-container form {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-actions {
+    flex-direction: column-reverse;
+  }
+
+  .edit-actions button {
+    width: 100%;
+  }
+}

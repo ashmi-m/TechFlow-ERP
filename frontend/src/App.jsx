@@ -27,6 +27,7 @@ import EmployeeMyProjects from "./pages/EmployeeMyProjects";
 import EmployeeMyTasks from "./pages/EmployeeMyTasks";
  import EmployeeLogin from "./pages/EmployeeLogin";
  import TeamMembers from "./pages/TeamMembers";
+ import EditEmployee from "./pages/EditEmployee";
 function App() {
   return (
     <BrowserRouter>
@@ -111,6 +112,7 @@ function App() {
 
         {/* Unknown Routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/employees/:id/edit" element={<EditEmployee />} />
 
       </Routes>
     </BrowserRouter>
