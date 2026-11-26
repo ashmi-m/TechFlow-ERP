@@ -1,10 +1,9 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "./EmployeeDashboard.css";
 
-
+const API = "http://localhost:5000/api";
 
 function EmployeeDashboard() {
   const navigate = useNavigate();
@@ -14,25 +13,68 @@ function EmployeeDashboard() {
 
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
- const [activities, setActivities] = useState([]);
-const [activitiesLoading, setActivitiesLoading] = useState(true);
-  const [projectsLoading, setProjectsLoading] = useState(true);
-  const [projectsError, setProjectsError] = useState("");
+  const [activities, setActivities] = useState([]);
 
   const [loading, setLoading] = useState(true);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [activitiesLoading, setActivitiesLoading] = useState(true);
+
   const [error, setError] = useState("");
+  const [projectsError, setProjectsError] = useState("");
 
   const [showNotifications, setShowNotifications] = useState(false);
+  const [updatingTask, setUpdatingTask] = useState(null);
 
-  const user = JSON.parse(
-    localStorage.getItem("user") ||
-      sessionStorage.getItem("user") ||
-      "{}"
-  );
+  // AUTHENTICATED USER
+  const user = useMemo(() => {
+    try {
+      return JSON.parse(
+        localStorage.getItem("user") ||
+        sessionStorage.getItem("user") ||
+        "{}"
+      );
+    } catch {
+      return {};
+    }
+  }, []);
 
   const token =
     localStorage.getItem("token") ||
     sessionStorage.getItem("token");
+
+  // EMPLOYEE DETAILS
+  const employeeName =
+    user.name ||
+    user.fullName ||
+    user.username ||
+    "Employee";
+
+  const employeeEmail = user.email || "Employee account";
+
+  const employeeInitials = employeeName
+    .trim()
+    .split(/\s+/)
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  // DATE FORMATTER
+  const formatDate = (date) => {
+    if (!date) return "Not assigned";
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Not assigned";
+    }
+
+    return parsedDate.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   // FETCH EMPLOYEE PROJECTS
   useEffect(() => {
@@ -41,36 +83,33 @@ const [activitiesLoading, setActivitiesLoading] = useState(true);
         setProjectsLoading(true);
         setProjectsError("");
 
-        const response = await fetch(
-          "http://localhost:5000/api/projects/my-projects",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(`${API}/projects/my-projects`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-          throw new Error(data.message || "Failed to fetch projects");
+          throw new Error(data.message || "Failed to fetch projects.");
         }
 
-        const formattedProjects = data.projects.map((project) => ({
+        const formattedProjects = (data.projects || []).map((project) => ({
           id: project._id,
-          name: project.projectName,
-          code: project.projectCode,
-          priority: `${project.priority} Priority`,
-          status: project.status,
-          role: data.employee.designation,
+          name: project.projectName || "Untitled Project",
+          code: project.projectCode || "N/A",
+          priority: project.priority || "Medium",
+          status: project.status || "Not Started",
+          role: data.employee?.designation || "Team Member",
           manager: project.projectManager?.name || "Not assigned",
-          tasks: `Team members: ${project.teamMembers?.length || 0}`,
-          progress: project.progress,
-          deadline: project.deadline
-            ? new Date(project.deadline).toLocaleDateString("en-GB")
-            : "Not assigned",
+          teamMembers: project.teamMembers?.length || 0,
+          progress: Math.min(
+            100,
+            Math.max(0, Number(project.progress) || 0)
+          ),
+          deadline: project.deadline,
         }));
 
         setProjects(formattedProjects);
@@ -96,34 +135,28 @@ const [activitiesLoading, setActivitiesLoading] = useState(true);
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          "http://localhost:5000/api/tasks/my-tasks",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(`${API}/tasks/my-tasks`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-          throw new Error(data.message || "Failed to fetch tasks");
+          throw new Error(data.message || "Failed to fetch tasks.");
         }
 
-        const formattedTasks = data.tasks.map((task) => ({
+        const formattedTasks = (data.tasks || []).map((task) => ({
           id: task._id,
-          name: task.taskName,
-          description: task.description,
+          name: task.taskName || "Untitled Task",
+          description: task.description || "No description available",
           project: task.project?.projectName || "No project",
-          priority: task.priority,
-          dueDate: task.dueDate
-            ? new Date(task.dueDate).toLocaleDateString("en-GB")
-            : "Not assigned",
+          priority: task.priority || "Medium",
+          dueDate: formatDate(task.dueDate),
           dueDateRaw: task.dueDate,
-          status: task.status,
+          status: task.status || "To Do",
         }));
 
         setTasks(formattedTasks);
@@ -134,7 +167,6 @@ const [activitiesLoading, setActivitiesLoading] = useState(true);
       }
     };
 
-
     if (token) {
       fetchEmployeeTasks();
     } else {
@@ -143,59 +175,41 @@ const [activitiesLoading, setActivitiesLoading] = useState(true);
     }
   }, [token]);
 
-  // FETCH EMPLOYEE RECENT ACTIVITIES
-useEffect(() => {
-  const fetchEmployeeActivities = async () => {
-    try {
-      setActivitiesLoading(true);
+  // FETCH EMPLOYEE ACTIVITIES
+  useEffect(() => {
+    const fetchEmployeeActivities = async () => {
+      try {
+        setActivitiesLoading(true);
 
-      const response = await fetch(
-        "http://localhost:5000/api/activities/my-activities",
-        {
-          method: "GET",
+        const response = await fetch(`${API}/activities/my-activities`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to fetch activities.");
         }
-      );
 
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to fetch activities");
+        setActivities(data.activities || []);
+      } catch (err) {
+        console.error("Recent Activities Error:", err);
+      } finally {
+        setActivitiesLoading(false);
       }
+    };
 
-      setActivities(data.activities);
-    } catch (error) {
-      console.error("Recent Activities Error:", error);
-    } finally {
+    if (token) {
+      fetchEmployeeActivities();
+    } else {
       setActivitiesLoading(false);
     }
-  };
+  }, [token]);
 
-  if (token) {
-    fetchEmployeeActivities();
-  } else {
-    setActivitiesLoading(false);
-  }
-}, [token]);
-
-  // EMPLOYEE DETAILS
-  const employeeName =
-    user.name ||
-    user.fullName ||
-    user.username ||
-    "Anjali Menon";
-
-  const employeeInitials = employeeName
-    .split(" ")
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-  // TASK COUNTS
+  // TASK STATISTICS
   const completedTasks = tasks.filter(
     (task) => task.status === "Completed"
   ).length;
@@ -204,6 +218,31 @@ useEffect(() => {
     (task) => task.status === "In Progress"
   ).length;
 
+  const pendingTasks = tasks.filter(
+    (task) => task.status === "To Do"
+  ).length;
+
+  const completionRate = tasks.length
+    ? Math.round((completedTasks / tasks.length) * 100)
+    : 0;
+
+  // DATE COMPARISON
+  const getDateOnly = (date) => {
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return null;
+    }
+
+    return new Date(
+      parsedDate.getFullYear(),
+      parsedDate.getMonth(),
+      parsedDate.getDate()
+    );
+  };
+
+  const today = getDateOnly(new Date());
+
   // UPCOMING DEADLINES
   const upcomingDeadlines = tasks
     .filter((task) => {
@@ -211,13 +250,9 @@ useEffect(() => {
         return false;
       }
 
-      const dueDate = new Date(task.dueDateRaw);
-      const today = new Date();
+      const dueDate = getDateOnly(task.dueDateRaw);
 
-      dueDate.setHours(0, 0, 0, 0);
-      today.setHours(0, 0, 0, 0);
-
-      return dueDate >= today;
+      return dueDate && today && dueDate >= today;
     })
     .sort(
       (a, b) =>
@@ -230,26 +265,28 @@ useEffect(() => {
       return false;
     }
 
-    const dueDate = new Date(task.dueDateRaw);
-    const today = new Date();
+    const dueDate = getDateOnly(task.dueDateRaw);
 
-    dueDate.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-
-    return dueDate < today;
+    return dueDate && today && dueDate < today;
   }).length;
 
-  // SEARCH TASKS
+  // SEARCH
   const filteredTasks = useMemo(() => {
-    return tasks.filter((task) => {
-      const searchText = search.toLowerCase();
+    const searchText = search.toLowerCase().trim();
 
-      return (
-        task.name.toLowerCase().includes(searchText) ||
-        task.project.toLowerCase().includes(searchText) ||
-        task.status.toLowerCase().includes(searchText)
-      );
-    });
+    if (!searchText) return tasks;
+
+    return tasks.filter((task) =>
+      [
+        task.name,
+        task.project,
+        task.status,
+        task.priority,
+        task.description,
+      ].some((value) =>
+        String(value || "").toLowerCase().includes(searchText)
+      )
+    );
   }, [tasks, search]);
 
   // SCROLL TO SECTION
@@ -264,44 +301,52 @@ useEffect(() => {
 
   // LOGOUT
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    Swal.fire({
+      title: "Sign out?",
+      text: "Are you sure you want to log out?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, logout",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#2864ef",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
 
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
 
-    navigate("/", { replace: true });
+        navigate("/employee/login", { replace: true });
+      }
+    });
   };
 
   // UPDATE TASK STATUS
   const handleTaskStatus = async (taskId, newStatus) => {
+    const previousTask = tasks.find((task) => task.id === taskId);
+
+    if (!previousTask || previousTask.status === newStatus) return;
+
     try {
+      setUpdatingTask(taskId);
+
       const response = await fetch(
-        `http://localhost:5000/api/tasks/my-tasks/${taskId}/status`,
+        `${API}/tasks/my-tasks/${taskId}/status`,
         {
           method: "PUT",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            status: newStatus,
-          }),
+          body: JSON.stringify({ status: newStatus }),
         }
       );
-
-      const contentType = response.headers.get("content-type");
-
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error(
-          `Server returned an invalid response. Status: ${response.status}`
-        );
-      }
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to update task status");
+        throw new Error(data.message || "Failed to update task status.");
       }
 
       setTasks((previousTasks) =>
@@ -312,43 +357,48 @@ useEffect(() => {
         )
       );
 
+      // Refresh recent activities
       const activityResponse = await fetch(
-  "http://localhost:5000/api/activities/my-activities",
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  }
-);
+        `${API}/activities/my-activities`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-const activityData = await activityResponse.json();
+      const activityData = await activityResponse.json();
 
-if (activityResponse.ok && activityData.success) {
-  setActivities(activityData.activities);
-}
+      if (activityResponse.ok && activityData.success) {
+        setActivities(activityData.activities || []);
+      }
 
       Swal.fire({
         icon: "success",
-        title: "Success!",
-        text: "Task status updated successfully!",
-        timer: 2000,
+        title: "Status updated",
+        text: "Your task status has been updated successfully.",
+        timer: 1800,
         showConfirmButton: false,
       });
-    } catch (error) {
+    } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "Update Failed!",
-        text: error.message,
+        title: "Update failed",
+        text: err.message,
         confirmButtonColor: "#2864ef",
       });
+    } finally {
+      setUpdatingTask(null);
     }
   };
 
   return (
     <div className="ed-layout">
+
       {/* SIDEBAR */}
       <aside className="ed-sidebar">
+
         <div className="ed-brand">
           <div className="ed-brand-icon">✦</div>
 
@@ -358,89 +408,111 @@ if (activityResponse.ok && activityData.success) {
           </div>
         </div>
 
+        <div className="ed-nav-label">WORKSPACE</div>
+
         <nav className="ed-navigation">
+
           <button
             className={activeMenu === "Dashboard" ? "active" : ""}
             onClick={() => scrollToSection("ed-dashboard", "Dashboard")}
           >
-            <span>▦</span> Dashboard
+            <span>▦</span>
+            Dashboard
           </button>
 
           <button
-            onClick={() => scrollToSection("ed-tasks", "My Tasks")}
             className={activeMenu === "My Tasks" ? "active" : ""}
+            onClick={() => scrollToSection("ed-tasks", "My Tasks")}
           >
-            <span>▤</span> My Tasks
+            <span>▤</span>
+            My Tasks
             <small>{tasks.length}</small>
           </button>
 
           <button
-            onClick={() => scrollToSection("ed-projects", "My Projects")}
             className={activeMenu === "My Projects" ? "active" : ""}
+            onClick={() => scrollToSection("ed-projects", "My Projects")}
           >
-            <span>▱</span> My Projects
+            <span>▱</span>
+            My Projects
             <small>{projects.length}</small>
           </button>
 
           <button
+            className={activeMenu === "Notifications" ? "active" : ""}
             onClick={() => {
               setShowNotifications((prev) => !prev);
               setActiveMenu("Notifications");
             }}
-            className={activeMenu === "Notifications" ? "active" : ""}
           >
-            <span>♧</span> Notifications
-            <small className="ed-notification-count">3</small>
+            <span>♧</span>
+            Notifications
+            {activities.length > 0 && (
+              <small>{activities.length}</small>
+            )}
           </button>
 
           <button
-            onClick={() => scrollToSection("ed-profile", "My Profile")}
             className={activeMenu === "My Profile" ? "active" : ""}
+            onClick={() => scrollToSection("ed-profile", "My Profile")}
           >
-            <span>♙</span> My Profile
+            <span>♙</span>
+            My Profile
           </button>
+
         </nav>
 
         <div className="ed-sidebar-bottom">
+
           <div className="ed-sidebar-promo">
-            <span>◷</span>
-            <h4>Better Teams</h4>
-            <p>Organize activities and grow together.</p>
+            <div className="ed-promo-icon">✧</div>
+            <h4>Stay Productive</h4>
+            <p>Small progress every day creates great results.</p>
           </div>
 
           <button className="ed-logout" onClick={handleLogout}>
-            <span>⇥</span> Logout
+            <span>⇥</span>
+            Sign Out
           </button>
 
           <div className="ed-sidebar-footer">
-            <span>Version 1.0.0</span>
+            <span>TechFlow ERP</span>
             <span className="ed-online">● Online</span>
           </div>
+
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN */}
       <main className="ed-main" id="ed-dashboard">
-        {/* TOP HEADER */}
+
+        {/* TOPBAR */}
         <header className="ed-topbar">
+
           <div className="ed-search">
             <span>⌕</span>
 
             <input
               type="text"
-              placeholder="Search my tasks and projects..."
+              placeholder="Search tasks, projects, priorities..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+
+            {search && (
+              <button onClick={() => setSearch("")}>✕</button>
+            )}
           </div>
 
           <div className="ed-topbar-right">
+
             <button
               className="ed-notification-button"
               onClick={() => setShowNotifications((prev) => !prev)}
+              aria-label="Notifications"
             >
               ♧
-              <span></span>
+              {activities.length > 0 && <span />}
             </button>
 
             <div className="ed-user-info">
@@ -453,61 +525,66 @@ if (activityResponse.ok && activityData.success) {
 
               <span>⌄</span>
             </div>
+
           </div>
         </header>
 
-        {/* PAGE CONTENT */}
+        {/* CONTENT */}
         <div className="ed-content">
-          {/* PAGE TITLE */}
+
+          {/* PAGE HEADING */}
           <section className="ed-page-heading">
+
             <div>
               <div className="ed-breadcrumb">
-                Dashboard <span>/</span> Employee
+                Workspace <span>/</span> Dashboard
               </div>
 
-              <h1>Employee Dashboard</h1>
+              <div className="ed-welcome-label">
+                YOUR WORKSPACE
+              </div>
+
+              <h1>Welcome back, {employeeName.split(" ")[0]}.</h1>
 
               <p>
-                Track your tasks, monitor project progress, and stay organized.
+                Here's an overview of your work, projects and progress.
               </p>
             </div>
 
             <div className="ed-heading-actions">
+
               <button
                 className="ed-secondary-button"
                 onClick={() => scrollToSection("ed-projects", "My Projects")}
               >
-                View My Projects
-              </button>
-
-              <button
-                className="ed-secondary-button"
-                onClick={() => scrollToSection("ed-profile", "My Profile")}
-              >
-                Update My Profile
+                View Projects
               </button>
 
               <button
                 className="ed-primary-button"
                 onClick={() => scrollToSection("ed-tasks", "My Tasks")}
               >
-                ▤ View My Tasks
+                View My Tasks →
               </button>
+
             </div>
           </section>
 
-          {/* SUMMARY CARDS */}
+          {/* SUMMARY */}
           <section className="ed-summary-grid">
+
             <div className="ed-summary-card">
               <div className="ed-card-top">
-                <span>MY TASKS</span>
+                <span>ASSIGNED TASKS</span>
                 <span className="ed-card-icon blue">▤</span>
               </div>
 
-              <h2>{tasks.length}</h2>
-              <p>Total tasks assigned to me</p>
+              <h2>{loading ? "—" : tasks.length}</h2>
+
+              <p>Total tasks assigned to you</p>
+
               <small className="blue-text">
-                {upcomingDeadlines.length} upcoming deadlines
+                {pendingTasks} awaiting action
               </small>
             </div>
 
@@ -517,10 +594,12 @@ if (activityResponse.ok && activityData.success) {
                 <span className="ed-card-icon purple">ϟ</span>
               </div>
 
-              <h2>{inProgressTasks}</h2>
+              <h2>{loading ? "—" : inProgressTasks}</h2>
+
               <p>Tasks currently being worked on</p>
-              <small className="green-text">
-                ● Active project activities
+
+              <small className="purple-text">
+                Active work
               </small>
             </div>
 
@@ -530,10 +609,12 @@ if (activityResponse.ok && activityData.success) {
                 <span className="ed-card-icon green">✓</span>
               </div>
 
-              <h2>{completedTasks}</h2>
-              <p>Tasks successfully completed</p>
+              <h2>{loading ? "—" : completedTasks}</h2>
+
+              <p>Successfully completed tasks</p>
+
               <small className="green-text">
-                Successfully completed tasks
+                {completionRate}% completion rate
               </small>
             </div>
 
@@ -543,54 +624,103 @@ if (activityResponse.ok && activityData.success) {
                 <span className="ed-card-icon red">△</span>
               </div>
 
-              <h2>{overdueTasks}</h2>
-              <p>Tasks requiring immediate attention</p>
-              <small className="red-text">Attention required</small>
+              <h2>{loading ? "—" : overdueTasks}</h2>
+
+              <p>Tasks past their due date</p>
+
+              <small className="red-text">
+                {overdueTasks > 0 ? "Needs your attention" : "All on track"}
+              </small>
             </div>
+
           </section>
 
-          {/* TASK MANAGEMENT */}
-          <section className="ed-panel ed-tasks-panel" id="ed-tasks">
-            <div className="ed-section-heading">
-              <h3>My Tasks</h3>
+          {/* PRODUCTIVITY */}
+          <section className="ed-productivity-panel">
 
-              <button onClick={() => setSearch("")}>
-                View All Tasks →
-              </button>
+            <div className="ed-productivity-info">
+              <div>
+                <span className="ed-productivity-label">
+                  YOUR PRODUCTIVITY
+                </span>
+
+                <h3>Task completion overview</h3>
+
+                <p>
+                  Keep moving forward. Every completed task counts.
+                </p>
+              </div>
+
+              <div className="ed-productivity-rate">
+                {loading ? "—" : `${completionRate}%`}
+              </div>
+            </div>
+
+            <div className="ed-productivity-track">
+              <div
+                className="ed-productivity-value"
+                style={{ width: `${completionRate}%` }}
+              />
+            </div>
+
+            <div className="ed-productivity-footer">
+              <span>{completedTasks} completed</span>
+              <span>{tasks.length} total tasks</span>
+            </div>
+
+          </section>
+
+          {/* TASKS */}
+          <section className="ed-panel ed-tasks-panel" id="ed-tasks">
+
+            <div className="ed-section-heading">
+              <div>
+                <span className="ed-section-eyebrow">WORK MANAGEMENT</span>
+                <h3>My Tasks</h3>
+                <p>Manage your assigned tasks and update their progress.</p>
+              </div>
+
+              <span className="ed-section-count">
+                {tasks.length} Tasks
+              </span>
             </div>
 
             <div className="ed-table-wrapper">
+
               <table className="ed-task-table">
+
                 <thead>
                   <tr>
-                    <th>TASK NAME</th>
+                    <th>TASK</th>
                     <th>PROJECT</th>
                     <th>PRIORITY</th>
                     <th>DUE DATE</th>
                     <th>STATUS</th>
-                    <th>ACTION</th>
+                    <th>UPDATE</th>
                   </tr>
                 </thead>
 
                 <tbody>
+
                   {loading ? (
                     <tr>
                       <td colSpan="6" className="ed-empty">
-                        Loading tasks...
+                        Loading your tasks...
                       </td>
                     </tr>
                   ) : error ? (
                     <tr>
-                      <td colSpan="6" className="ed-empty">
+                      <td colSpan="6" className="ed-empty ed-error">
                         {error}
                       </td>
                     </tr>
                   ) : filteredTasks.length > 0 ? (
                     filteredTasks.map((task) => (
                       <tr key={task.id}>
+
                         <td>
                           <div className="ed-task-name">
-                            <span className="ed-task-dot"></span>
+                            <span className="ed-task-dot" />
 
                             <div>
                               <strong>{task.name}</strong>
@@ -603,7 +733,9 @@ if (activityResponse.ok && activityData.success) {
 
                         <td>
                           <span
-                            className={`ed-priority ${task.priority.toLowerCase()}`}
+                            className={`ed-priority ${String(
+                              task.priority
+                            ).toLowerCase()}`}
                           >
                             {task.priority}
                           </span>
@@ -615,9 +747,9 @@ if (activityResponse.ok && activityData.success) {
                           <span
                             className={`ed-status ${task.status
                               .toLowerCase()
-                              .replace(" ", "-")}`}
+                              .replace(/\s+/g, "-")}`}
                           >
-                            ● {task.status}
+                            {task.status}
                           </span>
                         </td>
 
@@ -625,6 +757,7 @@ if (activityResponse.ok && activityData.success) {
                           <select
                             className="ed-task-action"
                             value={task.status}
+                            disabled={updatingTask === task.id}
                             onChange={(e) =>
                               handleTaskStatus(task.id, e.target.value)
                             }
@@ -634,16 +767,26 @@ if (activityResponse.ok && activityData.success) {
                             <option value="In Progress">In Progress</option>
                             <option value="Completed">Completed</option>
                           </select>
+
+                          {updatingTask === task.id && (
+                            <span className="ed-updating">
+                              Updating...
+                            </span>
+                          )}
                         </td>
+
                       </tr>
                     ))
                   ) : (
                     <tr>
                       <td colSpan="6" className="ed-empty">
-                        No tasks found.
+                        {search
+                          ? "No tasks match your search."
+                          : "No tasks assigned yet."}
                       </td>
                     </tr>
                   )}
+
                 </tbody>
               </table>
             </div>
@@ -651,47 +794,46 @@ if (activityResponse.ok && activityData.success) {
             <div className="ed-table-footer">
               Showing {filteredTasks.length} of {tasks.length} assigned tasks
             </div>
+
           </section>
 
-          {/* BOTTOM GRID */}
+          {/* LOWER GRID */}
           <div className="ed-bottom-grid">
+
             {/* PROJECTS */}
             <section
               className="ed-panel ed-projects-panel"
               id="ed-projects"
             >
+
               <div className="ed-section-heading">
-                <h3>
-                  My Projects{" "}
-                  <span className="ed-count-badge">
-                    {
-                      projects.filter(
-                        (project) => project.status === "In Progress"
-                      ).length
-                    }{" "}
-                    Active
-                  </span>
-                </h3>
+                <div>
+                  <span className="ed-section-eyebrow">COLLABORATION</span>
+                  <h3>My Projects</h3>
+                  <p>Projects you are currently contributing to.</p>
+                </div>
 
-                <button>View All Projects →</button>
+                <span className="ed-section-count">
+                  {projects.length} Projects
+                </span>
               </div>
-
-              <p className="ed-muted">
-                Projects you are currently contributing to.
-              </p>
 
               {projectsLoading ? (
                 <p className="ed-empty">Loading projects...</p>
               ) : projectsError ? (
-                <p className="ed-empty">{projectsError}</p>
+                <p className="ed-empty ed-error">{projectsError}</p>
               ) : projects.length > 0 ? (
                 projects.map((project) => (
                   <div className="ed-project-card" key={project.id}>
+
                     <div className="ed-project-title">
                       <div>
-                        <span className="ed-project-dot"></span>
-                        <strong>{project.name}</strong>
-                        <small>({project.code})</small>
+                        <span className="ed-project-dot" />
+
+                        <div>
+                          <strong>{project.name}</strong>
+                          <small>{project.code}</small>
+                        </div>
                       </div>
 
                       <span className="ed-project-status">
@@ -700,15 +842,19 @@ if (activityResponse.ok && activityData.success) {
                     </div>
 
                     <div className="ed-project-badges">
-                      <span className="ed-project-priority">
-                        {project.priority}
+                      <span className={`ed-project-priority ${project.priority.toLowerCase()}`}>
+                        {project.priority} Priority
                       </span>
-                      <span>{project.tasks}</span>
+
+                      <span>
+                        {project.teamMembers} Team Members
+                      </span>
                     </div>
 
                     <div className="ed-project-details">
+
                       <div>
-                        <small>Role</small>
+                        <small>Your Role</small>
                         <strong>{project.role}</strong>
                       </div>
 
@@ -716,10 +862,11 @@ if (activityResponse.ok && activityData.success) {
                         <small>Project Manager</small>
                         <strong>{project.manager}</strong>
                       </div>
+
                     </div>
 
                     <div className="ed-progress-heading">
-                      <span>Overall Project Progress</span>
+                      <span>Project Progress</span>
                       <strong>{project.progress}%</strong>
                     </div>
 
@@ -727,59 +874,57 @@ if (activityResponse.ok && activityData.success) {
                       <div
                         className="ed-progress-value"
                         style={{ width: `${project.progress}%` }}
-                      ></div>
+                      />
                     </div>
 
                     <div className="ed-project-footer">
-                      <span>Deadline: {project.deadline}</span>
-                      <button>View Project</button>
+                      <span>
+                        Deadline: {formatDate(project.deadline)}
+                      </span>
                     </div>
+
                   </div>
                 ))
               ) : (
                 <p className="ed-empty">No projects assigned yet.</p>
               )}
+
             </section>
 
             {/* RIGHT COLUMN */}
             <div className="ed-right-column">
-              {/* UPCOMING DEADLINES */}
-              <section className="ed-panel ed-deadlines-panel">
-                <div className="ed-section-heading">
-                  <h3>◷ Upcoming Deadlines</h3>
 
-                  <button
-                    onClick={() =>
-                      scrollToSection("ed-tasks", "My Tasks")
-                    }
-                  >
-                    View All
-                  </button>
+              {/* DEADLINES */}
+              <section className="ed-panel ed-deadlines-panel">
+
+                <div className="ed-section-heading">
+                  <div>
+                    <span className="ed-section-eyebrow">TIME MANAGEMENT</span>
+                    <h3>Upcoming Deadlines</h3>
+                  </div>
+
+                  <span className="ed-section-count">
+                    {upcomingDeadlines.length}
+                  </span>
                 </div>
 
                 {loading ? (
                   <p className="ed-empty">Loading deadlines...</p>
                 ) : upcomingDeadlines.length > 0 ? (
-                  upcomingDeadlines.map((task) => (
+                  upcomingDeadlines.slice(0, 5).map((task) => (
                     <div className="ed-deadline-item" key={task.id}>
-                      <div>
+
+                      <div className="ed-deadline-icon">◷</div>
+
+                      <div className="ed-deadline-content">
                         <strong>{task.name}</strong>
                         <p>{task.project}</p>
                       </div>
 
                       <div className="ed-deadline-meta">
-                        <span
-                          className={`ed-priority ${task.priority.toLowerCase()}`}
-                        >
-                          {task.priority}
-                        </span>
-
-                        <small>
-                          {new Date(task.dueDateRaw).toLocaleDateString(
-                            "en-GB"
-                          )}
-                        </small>
+                        <span>{formatDate(task.dueDateRaw)}</span>
                       </div>
+
                     </div>
                   ))
                 ) : (
@@ -787,92 +932,142 @@ if (activityResponse.ok && activityData.success) {
                     No upcoming deadlines. You're all caught up!
                   </p>
                 )}
+
               </section>
 
-{/* RECENT ACTIVITY */}
-<section className="ed-panel ed-activity-panel">
-  <div className="ed-section-heading">
-    <h3>Recent Activity</h3>
-    <span>Latest updates</span>
-  </div>
+              {/* RECENT ACTIVITY */}
+              <section className="ed-panel ed-activity-panel">
 
-  <div className="ed-activity-list">
-    {activitiesLoading ? (
-      <p className="ed-empty">Loading activities...</p>
-    ) : activities.length > 0 ? (
-      activities.map((activity) => (
-        <div className="ed-activity-item" key={activity._id}>
-          <span
-            className={`ed-activity-dot ${activity.type}`}
-          ></span>
+                <div className="ed-section-heading">
+                  <div>
+                    <span className="ed-section-eyebrow">YOUR WORKSPACE</span>
+                    <h3>Recent Activity</h3>
+                  </div>
 
-          <div>
-            <p>{activity.title}</p>
+                  <span className="ed-section-count">
+                    {activities.length} Updates
+                  </span>
+                </div>
 
-            <small>
-              {new Date(activity.createdAt).toLocaleString("en-IN", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </small>
+                <div className="ed-activity-list">
+
+                  {activitiesLoading ? (
+                    <p className="ed-empty">Loading activities...</p>
+                  ) : activities.length > 0 ? (
+                    activities.slice(0, 6).map((activity) => (
+                      <div
+                        className="ed-activity-item"
+                        key={activity._id}
+                      >
+
+                        <span
+                          className={`ed-activity-dot ${
+                            activity.type || "info"
+                          }`}
+                        />
+
+                        <div>
+                          <p>{activity.title}</p>
+
+                          <small>
+                            {new Date(activity.createdAt).toLocaleString(
+                              "en-IN",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </small>
+                        </div>
+
+                      </div>
+                    ))
+                  ) : (
+                    <p className="ed-empty">No recent activities yet.</p>
+                  )}
+
+                </div>
+
+              </section>
+
+            </div>
           </div>
-        </div>
-      ))
-    ) : (
-      <p className="ed-empty">No recent activities yet.</p>
-    )}
-    </div>
-</section>
 
-</div> {/* closes ed-right-column */}
-</div> {/* closes ed-bottom-grid */}
           {/* PROFILE */}
           <section
             className="ed-panel ed-profile-panel"
             id="ed-profile"
           >
+
             <div className="ed-section-heading">
-              <h3>My Profile</h3>
-              <span>Employee Information</span>
+              <div>
+                <span className="ed-section-eyebrow">ACCOUNT</span>
+                <h3>My Profile</h3>
+                <p>Your employee account information.</p>
+              </div>
             </div>
 
             <div className="ed-profile-content">
+
               <div className="ed-avatar ed-profile-avatar">
                 {employeeInitials}
               </div>
 
-              <div>
+              <div className="ed-profile-details">
                 <h3>{employeeName}</h3>
-                <p>{user.email || "Employee account"}</p>
+                <p>{employeeEmail}</p>
                 <span>Employee</span>
               </div>
+
             </div>
+
           </section>
 
           <footer className="ed-footer">
             © 2026 TechFlow ERP. All rights reserved.
+            <span>Built for better teamwork.</span>
           </footer>
+
         </div>
 
-        {/* NOTIFICATIONS POPUP */}
+        {/* NOTIFICATIONS */}
         {showNotifications && (
-          <div className="ed-notification-popup">
-            <div className="ed-section-heading">
-              <h3>Notifications</h3>
+          <>
+            <div
+              className="ed-popup-backdrop"
+              onClick={() => setShowNotifications(false)}
+            />
 
-              <button onClick={() => setShowNotifications(false)}>
-                ✕
-              </button>
+            <div className="ed-notification-popup">
+
+              <div className="ed-section-heading">
+                <div>
+                  <span className="ed-section-eyebrow">UPDATES</span>
+                  <h3>Recent Activity</h3>
+                </div>
+
+                <button onClick={() => setShowNotifications(false)}>
+                  ✕
+                </button>
+              </div>
+
+              {activities.length > 0 ? (
+                activities.slice(0, 5).map((activity) => (
+                  <div className="ed-popup-activity" key={activity._id}>
+                    <span className="ed-task-dot" />
+                    <p>{activity.title}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="ed-empty">No recent updates.</p>
+              )}
+
             </div>
-
-            <p>New task assigned to you.</p>
-            <p>Your project deadline is approaching.</p>
-            <p>Task status updated successfully.</p>
-          </div>
+          </>
         )}
+
       </main>
     </div>
   );

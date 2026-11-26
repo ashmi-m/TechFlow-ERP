@@ -1,10 +1,10 @@
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import employeeHero from "../assets/techflow-employee-hero.png";
 import "./EmployeeLogin.css";
 
 const API_URL = "http://localhost:5000/api/auth/login";
-
 
 function EmployeeLogin() {
   const navigate = useNavigate();
@@ -23,26 +23,21 @@ function EmployeeLogin() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  // Theme state
   const [theme, setTheme] = useState(
-    localStorage.getItem("employeeLoginTheme") || "dark"
+    localStorage.getItem("employeeLoginTheme") || "light"
   );
 
+  // Save selected theme
   useEffect(() => {
     localStorage.setItem("employeeLoginTheme", theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme((previous) =>
-      previous === "dark" ? "light" : "dark"
-    );
-  };
-
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData((previous) => ({
-      ...previous,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
     }));
 
@@ -50,319 +45,167 @@ function EmployeeLogin() {
     setMessage("");
   };
 
+  // Handle theme toggle
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
+  // Handle employee login
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  setError("");
-  setMessage("");
+    setError("");
+    setMessage("");
 
-  const email = formData.email.trim().toLowerCase();
+    const email = formData.email.trim().toLowerCase();
+    const password = formData.password;
 
-  if (!email || !formData.password) {
-    setError("Please enter your email address and password.");
-    return;
-  }
+    if (!email || !password) {
+      setError("Please enter your email and password.");
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password: formData.password,
-      }),
-    });
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const result = await response.json();
+      const result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(
-        result.message || "Invalid email address or password."
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Invalid email or password."
+        );
+      }
+
+      if (!result.user || !result.token) {
+        throw new Error(
+          "Invalid server response. Please try again."
+        );
+      }
+
+      // Only employees can access this portal
+      if (result.user.role !== "employee") {
+        throw new Error(
+          "Access denied. Please use the correct login portal."
+        );
+      }
+
+      // Clear previous login information
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("user");
+
+      // Store login information
+      const storage = rememberMe ? localStorage : sessionStorage;
+
+      storage.setItem("token", result.token);
+      storage.setItem("user", JSON.stringify(result.user));
+
+      // Remember email if selected
+      if (rememberMe) {
+        localStorage.setItem("employeeEmail", email);
+      } else {
+        localStorage.removeItem("employeeEmail");
+      }
+
+      // Navigate to employee dashboard
+      navigate("/employee/dashboard", { replace: true });
+
+    } catch (err) {
+      setError(
+        err.message || "Something went wrong. Please try again."
       );
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (!result.user || !result.token) {
-      throw new Error("Authentication information not received.");
-    }
-
-    // Redirect users to their correct login portal
-    // Allow only employee accounts
-if (result.user.role !== "employee") {
-  throw new Error(
-    "Access denied. This account is not an Employee account. Please use your correct login portal."
-  );
-}
-    
-
-
-    // Store employee authentication
-    const storage = rememberMe ? localStorage : sessionStorage;
-    const otherStorage = rememberMe ? sessionStorage : localStorage;
-
-    otherStorage.removeItem("token");
-    otherStorage.removeItem("user");
-
-    storage.setItem("token", result.token);
-    storage.setItem("user", JSON.stringify(result.user));
-   
-
-
-    // Remember email only, never password
-    if (rememberMe) {
-      localStorage.setItem("employeeEmail", email);
-    } else {
-      localStorage.removeItem("employeeEmail");
-    }
-
-    navigate("/employee/dashboard", { replace: true });
-
-  } catch (err) {
-    setError(
-      err.message || "Unable to connect to the server. Please try again."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
-
+  // Forgot password
   const handleForgotPassword = () => {
     setMessage(
-      "Please contact your administrator to reset your password."
+      "Please contact your HR or system administrator to reset your password."
     );
   };
 
+  // Contact admin
   const handleContactAdmin = () => {
     setMessage(
-      "Please contact your HR department or system administrator for assistance."
+      "Please contact your HR or system administrator for login assistance."
     );
   };
 
   return (
-    <div
-      className="employee-login-page"
-      data-theme={theme}
-    >
-      <div className="employee-background-glow glow-one"></div>
-      <div className="employee-background-glow glow-two"></div>
+    <main className="employee-login-page" data-theme={theme}>
+      <div className="employee-login-wrapper">
 
-      <main className="employee-login-wrapper">
-
-        {/* LEFT SECTION */}
-
-        <section className="employee-hero-section">
-
-          <div className="employee-brand">
-            <div className="brand-symbol">T</div>
-
-            <div className="brand-name">
-              <span>TechFlow</span>
-              <strong>ERP</strong>
-            </div>
-          </div>
-
-          <div className="employee-tagline">
-            Work Smarter
-            <span>•</span>
-            Grow Together
-            <span>•</span>
-            Achieve More
-          </div>
-
-          <div className="employee-portal-badge">
-            <span className="online-dot"></span>
-            Employee Portal – Your Work, Our Priority
-          </div>
-
-          <div className="employee-hero-content">
-
-            <div className="employee-hero-text">
-
-              <h1>
-                Welcome Back!
-                <span>Employee.</span>
-                Let's Achieve More.
-              </h1>
-
-              <p>
-                Access your tasks, track your progress,
-                and be a part of our growing team.
-              </p>
-
-              <div className="employee-benefits">
-
-                <div className="benefit-item">
-                  <div className="benefit-icon">✓</div>
-
-                  <div>
-                    <h4>View Your Tasks</h4>
-                    <span>
-                      Stay on top of your assignments.
-                    </span>
-                  </div>
-                </div>
-
-                <div className="benefit-item">
-                  <div className="benefit-icon">▥</div>
-
-                  <div>
-                    <h4>Track Your Progress</h4>
-                    <span>
-                      Monitor your goals and performance.
-                    </span>
-                  </div>
-                </div>
-
-                <div className="benefit-item">
-                  <div className="benefit-icon">♛</div>
-
-                  <div>
-                    <h4>Grow Your Career</h4>
-                    <span>
-                      Unlock new opportunities.
-                    </span>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* EMPLOYEE ILLUSTRATION */}
-
-            <div className="employee-illustration">
-
-              <div className="illustration-orbit"></div>
-
-              <div className="floating-card task-floating-card">
-                <h4>My Tasks</h4>
-                <p>✓ Complete Report</p>
-                <p>✓ Team Meeting</p>
-                <p>✓ Project Update</p>
-              </div>
-
-              <div className="floating-card progress-floating-card">
-                <h4>My Progress</h4>
-
-                <div className="progress-circle">
-                  <span>75%</span>
-                </div>
-              </div>
-
-              <div className="floating-card team-floating-card">
-                <h4>Team Activity</h4>
-
-                <div className="team-avatars">
-                  <span>👨🏻</span>
-                  <span>👩🏻</span>
-                  <span>👨🏽</span>
-                  <b>+5</b>
-                </div>
-              </div>
-
-              <div className="employee-plant">🌿</div>
-
-              <div className="employee-character">
-
-                <div className="character-head">
-                  <div className="character-hair"></div>
-
-                  <div className="character-eyes">
-                    <span></span>
-                    <span></span>
-                  </div>
-
-                  <div className="character-smile"></div>
-                </div>
-
-                <div className="character-body">
-                  <span>T</span>
-                </div>
-
-              </div>
-
-              <div className="employee-laptop">
-                <div className="laptop-screen">
-                  <span>T</span>
-                </div>
-
-                <div className="laptop-base"></div>
-              </div>
-
-              <div className="illustration-platform"></div>
-
-            </div>
-
-          </div>
-
-          <div className="employee-hero-footer">
-            <strong>TechFlow ERP</strong>
-            <span>•</span>
-            Employee Portal
-            <div></div>
-          </div>
-
-        </section>
-
-        {/* RIGHT SECTION */}
-
+        {/* LEFT LOGIN PANEL */}
         <section className="employee-form-section">
-
           <div className="employee-login-card">
 
-            {/* WORKING THEME BUTTON */}
+            {/* BRAND */}
+            <div className="employee-login-brand">
+              <div className="employee-brand-logo">
+                <span>T</span>
+              </div>
 
-            <button
-              type="button"
-              className="employee-theme-decoration"
-              onClick={toggleTheme}
-              aria-label="Toggle color theme"
-            >
-              <span>
-                {theme === "dark" ? "☀" : "☾"}
-              </span>
+              <div className="employee-brand-details">
+                <h2>
+                  TechFlow <span>ERP</span>
+                </h2>
 
-              {theme === "dark" ? "Light Mode" : "Dark Mode"}
-            </button>
-
-            <div className="login-brand">
-              <div className="brand-symbol">T</div>
-
-              <div className="brand-name">
-                <span>TechFlow</span>
-                <strong>ERP</strong>
+                <p>
+                  Work Smarter <span>•</span> Grow Together
+                  <span>•</span> Achieve More
+                </p>
               </div>
             </div>
 
-            <div className="login-divider-heading">
-              <span></span>
-              EMPLOYEE PORTAL
-              <span></span>
-            </div>
+            {/* HEADING */}
+            <div className="employee-login-intro">
+              <span className="employee-portal-label">
+                EMPLOYEE PORTAL
+              </span>
 
-            <div className="login-heading">
-              <h2>Welcome Back!</h2>
+              <h1>Welcome Back!</h1>
 
               <p>
                 Sign in to your employee account to continue.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            {/* LOGIN FORM */}
+            <form
+              onSubmit={handleSubmit}
+              className="employee-login-form"
+            >
 
               {/* EMAIL */}
-
               <div className="employee-input-group">
-
                 <label htmlFor="employee-email">
+                  <svg viewBox="0 0 24 24">
+                    <rect
+                      x="3"
+                      y="5"
+                      width="18"
+                      height="14"
+                      rx="2"
+                    />
+                    <path d="m3 7 9 7 9-7" />
+                  </svg>
+
                   Email Address
                 </label>
 
                 <div className="employee-input-wrapper">
-                  <span className="input-icon">✉</span>
-
                   <input
                     id="employee-email"
                     type="email"
@@ -374,20 +217,26 @@ if (result.user.role !== "employee") {
                     required
                   />
                 </div>
-
               </div>
 
               {/* PASSWORD */}
-
               <div className="employee-input-group">
-
                 <label htmlFor="employee-password">
+                  <svg viewBox="0 0 24 24">
+                    <rect
+                      x="4"
+                      y="10"
+                      width="16"
+                      height="11"
+                      rx="2"
+                    />
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                  </svg>
+
                   Password
                 </label>
 
                 <div className="employee-input-wrapper">
-                  <span className="input-icon">♙</span>
-
                   <input
                     id="employee-password"
                     type={showPassword ? "text" : "password"}
@@ -401,23 +250,34 @@ if (result.user.role !== "employee") {
 
                   <button
                     type="button"
-                    className="password-toggle"
+                    className="employee-password-toggle"
                     onClick={() =>
-                      setShowPassword((previous) => !previous)
+                      setShowPassword((prev) => !prev)
+                    }
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
                     }
                   >
-                    {showPassword ? "Hide" : "Show"}
+                    {showPassword ? (
+                      <svg viewBox="0 0 24 24">
+                        <path d="M3 3l18 18" />
+                        <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+                        <path d="M9.9 5.2A10.5 10.5 0 0 1 12 5c5 0 8.5 4.5 9.5 7-.4 1-1.2 2.2-2.4 3.3" />
+                        <path d="M6.2 6.2C3.8 7.7 2.5 10 2 12c1 2.5 4.5 7 10 7 1 0 2-.2 2.9-.5" />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24">
+                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
                   </button>
-
                 </div>
-
               </div>
 
-              {/* LOGIN OPTIONS */}
-
+              {/* OPTIONS */}
               <div className="employee-login-options">
-
-                <label className="remember-option">
+                <label className="employee-remember-label">
                   <input
                     type="checkbox"
                     checked={rememberMe}
@@ -431,63 +291,119 @@ if (result.user.role !== "employee") {
 
                 <button
                   type="button"
-                  className="forgot-password"
+                  className="employee-forgot-button"
                   onClick={handleForgotPassword}
                 >
                   Forgot Password?
                 </button>
-
               </div>
 
+              {/* ERROR MESSAGE */}
               {error && (
-                <div className="employee-error" role="alert">
+                <div
+                  className="employee-error-message"
+                  role="alert"
+                >
                   {error}
                 </div>
               )}
 
+              {/* INFO MESSAGE */}
               {message && (
-                <div className="employee-message" role="status">
+                <div
+                  className="employee-info-message"
+                  role="status"
+                >
                   {message}
                 </div>
               )}
 
-              {/* SIGN IN */}
-
+              {/* SIGN IN BUTTON */}
               <button
                 type="submit"
                 className="employee-signin-button"
                 disabled={loading}
               >
-                {loading ? "Signing In..." : "Sign In →"}
+                {loading ? (
+                  "Signing in..."
+                ) : (
+                  <>
+                    Sign In <span>→</span>
+                  </>
+                )}
               </button>
-
             </form>
 
-            <div className="employee-or-divider">
-              <span></span>
-              or
-              <span></span>
+            {/* DIVIDER */}
+            <div className="employee-login-divider">
+              <span>or</span>
             </div>
 
+            {/* CONTACT ADMIN */}
             <button
               type="button"
-              className="contact-admin-button"
+              className="employee-contact-button"
               onClick={handleContactAdmin}
             >
-              <span>♧</span>
+              <svg viewBox="0 0 24 24">
+                <path d="M4 14v-2a8 8 0 0 1 16 0v2" />
+                <rect x="3" y="12" width="4" height="7" rx="2" />
+                <rect x="17" y="12" width="4" height="7" rx="2" />
+                <path d="M17 19c-1 2-3 2-5 2" />
+              </svg>
+
               Contact Admin
             </button>
 
-            <div className="employee-login-footer">
+            {/* FOOTER */}
+            <footer className="employee-login-footer">
               © 2026 TechFlow ERP. All rights reserved.
-            </div>
+            </footer>
 
           </div>
-
         </section>
 
-      </main>
-    </div>
+        {/* RIGHT HERO PANEL */}
+        <section className="employee-hero-section">
+
+          <img
+            src={employeeHero}
+            alt="Empowering Your Work Journey"
+            className="employee-hero-image"
+          />
+
+          {/* THEME TOGGLE */}
+          <div className="employee-theme-toggle">
+
+            <button
+              type="button"
+              className={theme === "light" ? "active" : ""}
+              onClick={toggleTheme}
+              aria-label={
+                theme === "light" ? "Light mode" : "Switch theme"
+              }
+              title="Toggle theme"
+            >
+              ☼
+            </button>
+
+            <button
+              type="button"
+              className={theme === "dark" ? "active" : ""}
+              onClick={toggleTheme}
+              aria-label={
+                theme === "dark" ? "Dark mode" : "Switch theme"
+              }
+              title="Toggle theme"
+            >
+              ☾
+            </button>
+
+          </div>
+        </section>
+
+      </div>
+    </main>
   );
 }
 
